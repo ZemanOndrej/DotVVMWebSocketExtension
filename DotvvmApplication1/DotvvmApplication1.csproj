@@ -21,9 +21,6 @@
         <None Remove="dotvvm_serialized_config.json.tmp" />
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="wwwroot\" />
-    </ItemGroup>
-    <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0" />
     </ItemGroup>
@@ -31,7 +28,10 @@
         <DotNetCliToolReference Include="DotVVM.Compiler.Light" Version="1.1.5" />
     </ItemGroup>
     <ItemGroup>
+      <None Include="wwwroot\index.html" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\..\SimpleWebsocketApp\DotVVMWebSocket\DotVVMWebSocketExtension.csproj" />
       <ProjectReference Include="..\dotvvm\src\DotVVM.Framework.Hosting.AspNetCore\DotVVM.Framework.Hosting.AspNetCore.csproj" />
-      <ProjectReference Include="..\LiveComponent\LiveComponent.csproj" />
     </ItemGroup>
 </Project>

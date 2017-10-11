@@ -1,23 +1,28 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using DotVVM.Framework.ViewModel;
+using DotVVMWebSocketExtension.WebSocketService;
 
 namespace DotvvmApplication1.ViewModels
 {
-    public class DefaultViewModel : DotvvmViewModelBase
-    {
-        
-        public string Title { get; set; }
+	public class DefaultViewModel : DotvvmViewModelBase
+	{
+
+		public string Title { get; set; }
+
+		public MyHub Hub { get; set; }
 
 
-        public DefaultViewModel()
-        {
-            Title = "Hello from DotVVM!";
-        }
+		public DefaultViewModel()
+		{
+			Title = "Hello from DotVVM!";
+		}
 
-    }
+
+		public void CreateTask()
+		{
+			
+
+		}
+
+
+	}
 }

@@ -1,26 +1,19 @@
-﻿@viewModel DotvvmApplication1.ViewModels.DefaultViewModel, DotvvmApplication1
+﻿<!DOCTYPE html>
+<html>
 
-<!DOCTYPE html>
-
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="utf-8" />
-    <title></title>
+	<meta charset="utf-8"/>
+	<title>Real-Time Notifications</title>
 </head>
+
 <body>
+<h1>This should be mapped to "/ws"</h1>
+<input type=text id="textInput" placeholder="Enter your text"/>
+<button id="sendButton">Send</button>
 
-    <h1>{{value: Title}}</h1>
+<ul id="messages"></ul>
 
-
-
-	<input type=text id="textInput" placeholder="Enter your text" />
-	<button id="sendButton">Send</button>
-
-	<ul id="messages"></ul>
-
-
-
-	<script language="javascript" type="text/javascript">
+<script language="javascript" type="text/javascript">
 	var uri = "ws://" + window.location.host + "/ws";
 
 	function connect() {
@@ -62,7 +55,6 @@
 		item.appendChild(document.createTextNode(message));
 		list.appendChild(item);
 	}
-	</script>
-
+</script>
 </body>
 </html>

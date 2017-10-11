@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using LiveComponent.Middleware;
+using DotVVMWebSocketExtension.WebSocketService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -19,6 +13,7 @@ namespace DotvvmApplication1
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddWebEncoders();
+	        services.AddWebSocketManagerService();
 
             services.AddDotVVM(options =>
             {
@@ -33,17 +28,10 @@ namespace DotvvmApplication1
         {
             loggerFactory.AddConsole();
 
-
-
-
             // use DotVVM
             var dotvvmConfiguration = app.UseDotVVM<DotvvmStartup>(env.ContentRootPath);
-
-            // use static files
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(env.WebRootPath)
-            });
+	        app.MapWebSocketHub("/ws",app.ApplicationServices.GetService<MyHub>());
+            app.UseStaticFiles();
 
         }
     }
