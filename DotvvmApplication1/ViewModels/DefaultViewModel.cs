@@ -8,8 +8,6 @@ namespace DotvvmApplication1.ViewModels
 
 		public string Title { get; set; }
 
-		public MyHub Hub { get; set; }
-
 
 		public DefaultViewModel()
 		{

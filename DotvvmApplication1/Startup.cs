@@ -30,7 +30,7 @@ namespace DotvvmApplication1
 
             // use DotVVM
             var dotvvmConfiguration = app.UseDotVVM<DotvvmStartup>(env.ContentRootPath);
-	        app.MapWebSocketHub("/ws",app.ApplicationServices.GetService<MyHub>());
+	        app.MapWebSocketService("/ws",app.ApplicationServices.GetService<MyHub>());
             app.UseStaticFiles();
 
         }
