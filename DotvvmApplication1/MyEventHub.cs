@@ -4,14 +4,18 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
+using DotVVM.Framework.Hosting;
+using DotVVM.Framework.ViewModel.Serialization;
 using DotVVMWebSocketExtension.WebSocketService;
 
 namespace DotvvmApplication1
 {
 	public class MyEventHub : WebSocketHub
 	{
-		public MyEventHub(WebSocketManagerService webSocketManagerService) : base(webSocketManagerService)
+		public override async Task OnConnected(WebSocket socket)
 		{
+			await base.OnConnected(socket);
+			await SendMessageToAllAsync($" ${WebSocketManagerService.GetSocketId(socket)} user has connected");
 		}
 
 
@@ -28,6 +32,12 @@ namespace DotvvmApplication1
 
 
 		public override async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string message)
+		{
+		}
+
+		public MyEventHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer viewModelSerializer,
+			IDotvvmRequestContext context)
+			: base(webSocketManagerService, context, viewModelSerializer)
 		{
 		}
 	}

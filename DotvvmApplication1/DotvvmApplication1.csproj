@@ -29,6 +29,7 @@
     </ItemGroup>
     <ItemGroup>
       <None Include="wwwroot\index.html" />
+      <None Include="wwwroot\Scripts\websocketScript.js" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\SimpleWebsocketApp\DotVVMWebSocket\DotVVMWebSocketExtension.csproj" />

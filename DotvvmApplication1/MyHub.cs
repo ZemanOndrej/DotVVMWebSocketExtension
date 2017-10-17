@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Threading.Tasks;
+using DotVVM.Framework.Hosting;
+using DotVVM.Framework.ViewModel.Serialization;
 using DotVVMWebSocketExtension.WebSocketService;
 
 namespace DotvvmApplication1
 {
 	public class MyHub : WebSocketHub
 	{
-		public MyHub(WebSocketManagerService webSocketManagerService) : base(webSocketManagerService)
-		{
-		}
-
 		public override async Task OnConnected(WebSocket socket)
 		{
 			await base.OnConnected(socket);
@@ -29,6 +24,11 @@ namespace DotvvmApplication1
 		public override async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
 			await SendMessageToAllAsync($"{WebSocketManagerService.GetSocketId(socket)} said: {message}");
+		}
+
+		public MyHub(WebSocketManagerService webSocketManagerService,IDotvvmRequestContext context, IViewModelSerializer viewModelSerializer)
+			: base(webSocketManagerService,context, viewModelSerializer)
+		{
 		}
 	}
 }

@@ -1,0 +1,45 @@
+﻿@viewModel DotvvmApplication1.ViewModels.EventViewModel, DotvvmApplication1
+
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+
+	<dot:Button Click="{command: EventStart()}">EventStart</dot:Button>
+
+	<div id="message">Start Timer</div>
+
+
+	<script language="javascript" type="text/javascript">
+	var uri = "ws://" + window.location.host + "/ev";
+
+	function connect() {
+		socket = new WebSocket(uri,"tmpguid");
+		socket.onopen = function(event) {
+			console.log("opened connection to " + uri);
+		};
+		socket.onclose = function(event) {
+			console.log("closed connection from " + uri);
+		};
+		socket.onmessage = function(event) {
+			let message = document.getElementById("message");
+			message.innerHTML = event.data;
+
+			console.log(event.data);
+		};
+		socket.onerror = function(event) {
+			console.log("error: " + event.data);
+		};
+	}
+
+	connect();
+	</script>
+
+</body>
+</html>
+
+

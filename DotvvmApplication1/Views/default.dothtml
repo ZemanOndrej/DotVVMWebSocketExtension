@@ -8,62 +8,31 @@
     <title></title>
 </head>
 <body>
+	<dot:TextBox Text="{value: A}"  Type="Number"/>+
+	<dot:TextBox Text="{value: B}"  Type="Number"/>=
+	<dot:Button Click="{command: Sum()}">Sum</dot:Button>
+	{{value: C}}
 
-    <h1>{{value: Title}}</h1>
 	
 
 
-
-	<input type=text id="textInput" placeholder="Enter your text" />
-	<button id="sendButton">Send</button>
-
-	<ul id="messages"></ul>
+	<dot:TextBox Text="{value: Message}" placeholder="Enter your text" />
 
 
+	<dot:Repeater DataSource="{value: Messages}">
+		<ItemTemplate>
+			<p>{{value: _this}}</p>
+		</ItemTemplate>
+	</dot:Repeater>
 
-	<script language="javascript" type="text/javascript">
-	var uri = "ws://" + window.location.host + "/ws";
 
-	function connect() {
-		socket = new WebSocket(uri);
-		socket.onopen = function(event) {
-			console.log("opened connection to " + uri);
-		};
-		socket.onclose = function(event) {
-			console.log("closed connection from " + uri);
-		};
-		socket.onmessage = function(event) {
-			appendItem(list, event.data);
-			console.log(event.data);
-		};
-		socket.onerror = function(event) {
-			console.log("error: " + event.data);
-		};
-	}
 
-	connect();
-	var list = document.getElementById("messages");
-	var button = document.getElementById("sendButton");
-	button.addEventListener("click",
-		function() {
+	<dot:Button Click="{command: SendMessage()}">Send</dot:Button>
 
-			var input = document.getElementById("textInput");
-			sendMessage(input.value);
+	<dot:RequiredResource Name="websocketScript" />
 
-			input.value = "";
-		});
-
-	function sendMessage(message) {
-		console.log("Sending: " + message);
-		socket.send(message);
-	}
-
-	function appendItem(list, message) {
-		var item = document.createElement("li");
-		item.appendChild(document.createTextNode(message));
-		list.appendChild(item);
-	}
-	</script>
 
 </body>
 </html>
+
+

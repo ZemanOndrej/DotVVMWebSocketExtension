@@ -1,5 +1,6 @@
 using DotVVM.Framework;
 using DotVVM.Framework.Configuration;
+using DotVVM.Framework.ResourceManagement;
 using DotVVM.Framework.Routing;
 
 namespace DotvvmApplication1
@@ -17,6 +18,7 @@ namespace DotvvmApplication1
         private void ConfigureRoutes(DotvvmConfiguration config, string applicationPath)
         {
             config.RouteTable.Add("Default", "", "Views/default.dothtml");
+			config.RouteTable.Add("Event","event","Views/event.dothtml");
 
             // Uncomment the following line to auto-register all dothtml files in the Views folder
             // config.RouteTable.AutoDiscoverRoutes(new DefaultRouteStrategy(config));    
@@ -29,7 +31,13 @@ namespace DotvvmApplication1
 
         private void ConfigureResources(DotvvmConfiguration config, string applicationPath)
         {
-            // register custom resources and adjust paths to the built-in resources
-        }
+			// register custom resources and adjust paths to the built-in resources
+
+			config.Resources.Register("websocketScript", new ScriptResource()
+			{
+				Location = new UrlResourceLocation("~/Scripts/websocketScript.js"),
+				Dependencies = new string[0]
+			});
+		}
     }
 }
