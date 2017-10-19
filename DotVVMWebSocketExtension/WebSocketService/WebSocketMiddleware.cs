@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using DotVVM.Framework.Hosting;
 using DotVVM.Framework.Hosting.Middlewares;
 
 namespace DotVVMWebSocketExtension.WebSocketService
@@ -37,10 +36,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			{
 				socket = await context.WebSockets.AcceptWebSocketAsync();
 			}
-
-
 			await Hub.OnConnected(socket);
-
 			await Receive(socket);
 			await _next(context);
 		}
@@ -60,11 +56,8 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		private async Task HandleMessage(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
 			if (result.MessageType == WebSocketMessageType.Text)
-			{
 				await Hub.ReceiveAsync(socket, result, message);
-			}
-
-			if (result.MessageType == WebSocketMessageType.Close)
+			else if (result.MessageType == WebSocketMessageType.Close)
 			{
 				await Hub.OnDisconnected(socket);
 			}

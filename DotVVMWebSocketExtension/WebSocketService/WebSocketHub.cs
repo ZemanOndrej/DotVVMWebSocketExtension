@@ -1,13 +1,9 @@
 ﻿using DotVVM.Framework.Hosting;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DotVVM.Framework.Utils;
-using DotVVM.Framework.ViewModel;
 using DotVVM.Framework.ViewModel.Serialization;
 
 namespace DotVVMWebSocketExtension.WebSocketService
@@ -15,9 +11,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 	public abstract class WebSocketHub
 	{
 		protected readonly WebSocketManagerService WebSocketManagerService;
-		private readonly IViewModelSerializer serializer;
+		protected readonly IViewModelSerializer serializer;
 
-		public WebSocketHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer serializer)
+		protected WebSocketHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer serializer)
 		{
 			this.WebSocketManagerService = webSocketManagerService;
 			this.serializer = serializer;
@@ -37,8 +33,8 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		{
 			if (socket.State == WebSocketState.Open)
 			{
-				await socket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message)), WebSocketMessageType.Text, true,
-					CancellationToken.None);
+				await socket.SendAsync(new ArraySegment<byte>(
+					Encoding.UTF8.GetBytes(message)), WebSocketMessageType.Text, true, CancellationToken.None);
 			}
 		}
 
@@ -50,13 +46,18 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
-		public async Task UpdateViewModelOnClient( IDotvvmRequestContext context)
+		public async Task UpdateViewModelOnClient(IDotvvmRequestContext context)
 		{
-
 			serializer.BuildViewModel(context);
 			await SendMessageToAllAsync(serializer.SerializeViewModel(context));
 		}
 
-		public abstract Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string message);
+		public virtual async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string message)
+		{
+			await SendMessageAsync(socket,
+				$"Your Message was recieved, socketid&{WebSocketManagerService.GetSocketId(socket)}, message: &{message}");
+		}
+
+		public 
 	}
 }

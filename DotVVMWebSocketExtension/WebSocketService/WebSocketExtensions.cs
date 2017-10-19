@@ -24,7 +24,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public static IApplicationBuilder MapWebSocketService(this IApplicationBuilder app, PathString path, WebSocketHub hub)
 		{
-			app.UseWebSockets();
 			return app.Map(path, a => a.UseMiddleware<WebSocketMiddleware>(hub));
 		}
 	}

@@ -7,6 +7,9 @@ namespace DotvvmApplication1
 {
 	public class MyHub : WebSocketHub
 	{
+		public MyHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer viewModelSerializer)
+			: base(webSocketManagerService, viewModelSerializer){}
+
 		public override async Task OnConnected(WebSocket socket)
 		{
 			await base.OnConnected(socket);
@@ -23,11 +26,6 @@ namespace DotvvmApplication1
 		public override async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
 			await SendMessageToAllAsync($"{WebSocketManagerService.GetSocketId(socket)} said: {message}");
-		}
-
-		public MyHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer viewModelSerializer)
-			: base(webSocketManagerService, viewModelSerializer)
-		{
 		}
 	}
 }
