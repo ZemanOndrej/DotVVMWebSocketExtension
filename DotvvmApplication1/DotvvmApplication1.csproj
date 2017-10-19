@@ -32,7 +32,7 @@
       <None Include="wwwroot\Scripts\websocketScript.js" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\SimpleWebsocketApp\DotVVMWebSocket\DotVVMWebSocketExtension.csproj" />
+      <ProjectReference Include="..\DotVVMWebSocketExtension\DotVVMWebSocketExtension.csproj" />
       <ProjectReference Include="..\dotvvm\src\DotVVM.Framework.Hosting.AspNetCore\DotVVM.Framework.Hosting.AspNetCore.csproj" />
     </ItemGroup>
 </Project>

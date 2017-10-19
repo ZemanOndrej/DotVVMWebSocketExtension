@@ -4,16 +4,17 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using DotVVM.Framework.Hosting;
+using DotVVM.Framework.Hosting.Middlewares;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
-	public class WebSocketMiddleware
+	public class WebSocketMiddleware : DotvvmMiddlewareBase
 	{
 		private readonly RequestDelegate _next;
 		private WebSocketHub Hub { get; }
 
-		public WebSocketMiddleware(RequestDelegate next,
-			WebSocketHub hub)
+		public WebSocketMiddleware(RequestDelegate next, WebSocketHub hub)
 		{
 			_next = next;
 			Hub = hub;
@@ -23,13 +24,25 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		{
 			if (!context.WebSockets.IsWebSocketRequest)
 			{
+				await _next(context);
 				return;
 			}
+			WebSocket socket;
 
-			var socket = await context.WebSockets.AcceptWebSocketAsync();
+			if (context.WebSockets.WebSocketRequestedProtocols.Count > 0)
+			{
+				socket = await context.WebSockets.AcceptWebSocketAsync(context.WebSockets.WebSocketRequestedProtocols[0]);
+			}
+			else
+			{
+				socket = await context.WebSockets.AcceptWebSocketAsync();
+			}
+
+
 			await Hub.OnConnected(socket);
+
 			await Receive(socket);
-//			await _next(context);
+			await _next(context);
 		}
 
 		private async Task Receive(WebSocket socket)

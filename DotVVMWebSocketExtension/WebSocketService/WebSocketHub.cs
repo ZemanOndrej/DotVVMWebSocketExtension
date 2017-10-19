@@ -1,18 +1,26 @@
-﻿using System;
+﻿using DotVVM.Framework.Hosting;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DotVVM.Framework.Utils;
+using DotVVM.Framework.ViewModel;
+using DotVVM.Framework.ViewModel.Serialization;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
 	public abstract class WebSocketHub
 	{
-		protected WebSocketManagerService WebSocketManagerService { get; set; }
+		protected readonly WebSocketManagerService WebSocketManagerService;
+		private readonly IViewModelSerializer serializer;
 
-		protected WebSocketHub(WebSocketManagerService webSocketManagerService)
+		public WebSocketHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer serializer)
 		{
-			WebSocketManagerService = webSocketManagerService;
+			this.WebSocketManagerService = webSocketManagerService;
+			this.serializer = serializer;
 		}
 
 		public virtual async Task OnConnected(WebSocket socket)
@@ -40,6 +48,13 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			{
 				await SendMessageAsync(pair.Value, message);
 			}
+		}
+
+		public async Task UpdateViewModelOnClient( IDotvvmRequestContext context)
+		{
+
+			serializer.BuildViewModel(context);
+			await SendMessageToAllAsync(serializer.SerializeViewModel(context));
 		}
 
 		public abstract Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string message);

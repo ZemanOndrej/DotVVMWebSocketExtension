@@ -9,7 +9,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 	{
 		public static IServiceCollection AddWebSocketManagerService(this IServiceCollection services)
 		{
-			services.AddTransient<WebSocketManagerService>();
+			services.AddSingleton<WebSocketManagerService>();
 
 			foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
 			{
