@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using DotVVM.Framework.Hosting;
 using DotVVM.Framework.ViewModel.Serialization;
 using DotVVMWebSocketExtension.WebSocketService;
 
@@ -35,9 +34,8 @@ namespace DotvvmApplication1
 		{
 		}
 
-		public MyEventHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer viewModelSerializer,
-			IDotvvmRequestContext context)
-			: base(webSocketManagerService, context, viewModelSerializer)
+		public MyEventHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer viewModelSerializer)
+			: base(webSocketManagerService, viewModelSerializer)
 		{
 		}
 	}

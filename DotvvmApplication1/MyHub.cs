@@ -1,6 +1,5 @@
 ﻿using System.Net.WebSockets;
 using System.Threading.Tasks;
-using DotVVM.Framework.Hosting;
 using DotVVM.Framework.ViewModel.Serialization;
 using DotVVMWebSocketExtension.WebSocketService;
 
@@ -26,8 +25,8 @@ namespace DotvvmApplication1
 			await SendMessageToAllAsync($"{WebSocketManagerService.GetSocketId(socket)} said: {message}");
 		}
 
-		public MyHub(WebSocketManagerService webSocketManagerService,IDotvvmRequestContext context, IViewModelSerializer viewModelSerializer)
-			: base(webSocketManagerService,context, viewModelSerializer)
+		public MyHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer viewModelSerializer)
+			: base(webSocketManagerService, viewModelSerializer)
 		{
 		}
 	}
