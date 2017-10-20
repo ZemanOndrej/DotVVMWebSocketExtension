@@ -56,7 +56,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		private async Task HandleMessage(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
 			if (result.MessageType == WebSocketMessageType.Text)
+			{
 				await Hub.ReceiveAsync(socket, result, message);
+			}
 			else if (result.MessageType == WebSocketMessageType.Close)
 			{
 				await Hub.OnDisconnected(socket);

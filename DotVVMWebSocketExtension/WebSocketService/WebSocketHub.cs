@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DotVVM.Framework.ViewModel.Serialization;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
@@ -12,16 +14,29 @@ namespace DotVVMWebSocketExtension.WebSocketService
 	{
 		protected readonly WebSocketManagerService WebSocketManagerService;
 		protected readonly IViewModelSerializer serializer;
+		protected readonly IDotvvmRequestContext Context;
 
-		protected WebSocketHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer serializer)
+
+		public string SocketId { get; set; }
+		public string GroupId { get; set; }
+
+		protected WebSocketHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer serializer, IDotvvmRequestContext context)
 		{
-			this.WebSocketManagerService = webSocketManagerService;
+			WebSocketManagerService = webSocketManagerService;
 			this.serializer = serializer;
+			Context = context;
 		}
 
 		public virtual async Task OnConnected(WebSocket socket)
 		{
+
 			WebSocketManagerService.AddSocket(socket);
+			SocketId = WebSocketManagerService.GetSocketId(socket);
+			await Task.Delay(1);//TODO WTF
+			await SendMessageAsync(socket,
+				JsonConvert.SerializeObject(new { socketId = SocketId,type="webSocketInit" }, Formatting.None));
+
+
 		}
 
 		public virtual async Task OnDisconnected(WebSocket socket)
@@ -57,7 +72,5 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			await SendMessageAsync(socket,
 				$"Your Message was recieved, socketid&{WebSocketManagerService.GetSocketId(socket)}, message: &{message}");
 		}
-
-		public 
 	}
 }

@@ -7,12 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="WebSocketService\WebSocketViewModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\BcThesis-DotVVMExtension\dotvvm\src\DotVVM.Framework.Hosting.AspNetCore\DotVVM.Framework.Hosting.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\BcThesis-DotVVMExtension\dotvvm\src\DotVVM.Framework\DotVVM.Framework.csproj" />
+    <ProjectReference Include="..\..\DotVVMWebSocketExtension\dotvvm\src\DotVVM.Framework.Hosting.AspNetCore\DotVVM.Framework.Hosting.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\DotVVMWebSocketExtension\dotvvm\src\DotVVM.Framework\DotVVM.Framework.csproj" />
   </ItemGroup>
 
 </Project>

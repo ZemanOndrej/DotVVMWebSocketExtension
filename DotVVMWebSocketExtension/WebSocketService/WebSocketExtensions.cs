@@ -15,7 +15,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			{
 				if (type.GetTypeInfo().BaseType == typeof(WebSocketHub))
 				{
-					services.AddSingleton(type);
+					services.AddScoped(type);
 				}
 			}
 

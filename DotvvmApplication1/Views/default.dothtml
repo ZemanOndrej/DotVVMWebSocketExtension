@@ -16,6 +16,7 @@
 	
 
 
+	SocketId<{{value: Hub.SocketId}}>
 	<dot:TextBox Text="{value: Message}" placeholder="Enter your text" />
 
 

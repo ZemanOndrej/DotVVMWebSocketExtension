@@ -28,11 +28,10 @@
         <DotNetCliToolReference Include="DotVVM.Compiler.Light" Version="1.1.5" />
     </ItemGroup>
     <ItemGroup>
-      <None Include="wwwroot\index.html" />
       <None Include="wwwroot\Scripts\websocketScript.js" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\DotVVMWebSocketExtension\DotVVMWebSocketExtension.csproj" />
-      <ProjectReference Include="..\dotvvm\src\DotVVM.Framework.Hosting.AspNetCore\DotVVM.Framework.Hosting.AspNetCore.csproj" />
+      <ProjectReference Include="..\dotvvm\src\DotVVM.Framework\DotVVM.Framework.csproj" />
     </ItemGroup>
 </Project>
