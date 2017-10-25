@@ -24,8 +24,8 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		protected readonly IViewModelSerializationMapper mapper;
 
 
-		public string SocketId { get; set; }
-		public string GroupId { get; set; }
+		public string CurrentSocketId { get; set; }
+		public string CurrentGroupId { get; set; }
 
 		protected WebSocketHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer serializer,
 			IDotvvmRequestContext context, IViewModelSerializationMapper mapper)
@@ -39,10 +39,10 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public virtual async Task OnConnected(WebSocket socket)
 		{
 			WebSocketManagerService.AddSocket(socket);
-			SocketId = WebSocketManagerService.GetSocketId(socket);
+			CurrentSocketId = WebSocketManagerService.GetSocketId(socket);
 			await Task.Delay(4); //TODO WTF
-			await SendMessageAsync(socket,
-				JsonConvert.SerializeObject(new {socketId = SocketId, type = "webSocketInit"}, Formatting.None));
+			await SendMessageToSocketAsync(socket,
+				JsonConvert.SerializeObject(new {socketId = CurrentSocketId, type = "webSocketInit"}, Formatting.None));
 		}
 
 		public virtual async Task OnDisconnected(WebSocket socket)
@@ -50,7 +50,13 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			await WebSocketManagerService.RemoveSocket(socket);
 		}
 
-		public async Task SendMessageAsync(WebSocket socket, string message)
+		public virtual async Task ReceiveMessageAsync(WebSocket socket, WebSocketReceiveResult result, string message)
+		{
+			await SendMessageToSocketAsync(socket,
+				$"Your Message was recieved, socketid&{WebSocketManagerService.GetSocketId(socket)}, message: &{message}");
+		}
+
+		public async Task SendMessageToSocketAsync(WebSocket socket, string message)
 		{
 			if (socket.State == WebSocketState.Open)
 			{
@@ -59,50 +65,37 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
-		public async Task SendMessageAsync(string message)
+		public async Task SendMessageToSocketAsync(string socketId, string message)
 		{
-			await SendMessageAsync(WebSocketManagerService.GetWebSocketById(SocketId), message);
+			await SendMessageToSocketAsync(WebSocketManagerService.GetWebSocketById(socketId), message);
+		}
+
+		public async Task SendMessageToClientAsync(string message)
+		{
+			await SendMessageToSocketAsync(WebSocketManagerService.GetWebSocketById(CurrentSocketId), message);
 		}
 
 		public async Task SendMessageToAllAsync(string message)
 		{
 			foreach (var pair in WebSocketManagerService.Sockets)
 			{
-				await SendMessageAsync(pair.Value, message);
+				await SendMessageToSocketAsync(pair.Value, message);
 			}
 		}
 
-		public async Task UpdateViewModelOnAllClients(IDotvvmRequestContext context)
+		public async Task SentMessageToGroup(string groupId, string message)
 		{
-			serializer.BuildViewModel(context);
-			await SendMessageToAllAsync(serializer.SerializeViewModel(context));
+			foreach (var socketId in WebSocketManagerService.SocketGroups[groupId])
+			{
+				await SendMessageToSocketAsync(socketId, message);
+			}
 		}
 
-		public async Task UpdateYourViewModelOnClient(IDotvvmRequestContext context)
-		{
-			//			var ser = (DefaultViewModelSerializer) serializer;
-
-			Context.ViewModelJson?.Remove("viewModelDiff");
-
-			serializer.BuildViewModel(context);
-			await SendMessageAsync(serializer.SerializeViewModel(context));
-		}
-
-		public virtual async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string message)
-		{
-			await SendMessageAsync(socket,
-				$"Your Message was recieved, socketid&{WebSocketManagerService.GetSocketId(socket)}, message: &{message}");
-		}
-
-
-
-		public async Task UpdateYourViewModelOnClient()
+		public async Task UpdateCurrentViewModelOnClient()
 		{
 			Context.ViewModelJson?.Remove("viewModelDiff");
 			BuildViewModel();
-
-
-			await SendMessageAsync(serializer.SerializeViewModel(Context));
+			await SendMessageToClientAsync(serializer.SerializeViewModel(Context));
 		}
 
 		private void BuildViewModel()
@@ -120,7 +113,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 			catch (Exception ex)
 			{
-				throw new Exception($"Could not serialize viewModel of type { Context.ViewModel.GetType().Name }. Serialization failed at property { writer.Path }.", ex);
+				throw new Exception(
+					$"Could not serialize viewModel of type {Context.ViewModel.GetType().Name}. Serialization failed at property {writer.Path}.",
+					ex);
 			}
 
 			writer.Token["$csrfToken"] = Context.CsrfToken;
@@ -128,7 +123,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 			var result = new JObject();
 			result["viewModel"] = writer.Token;
-//			result["url"] = Context.HttpContext?.Request?.Url?.PathAndQuery; TODO wtf
+//			result["url"] = Context.HttpContext?.Request?.Url?.PathAndQuery;// TODO wtf
 			result["virtualDirectory"] = Context.HttpContext?.Request?.PathBase?.Value?.Trim('/') ?? "";
 			if (Context.ResultIdFragment != null)
 			{
@@ -137,7 +132,8 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			if (Context.IsPostBack || Context.IsSpaRequest)
 			{
 				result["action"] = "successfulCommand";
-				var renderedResources = new HashSet<string>(Context.ReceivedViewModelJson?["renderedResources"]?.Values<string>() ?? new string[] { });
+				var renderedResources =
+					new HashSet<string>(Context.ReceivedViewModelJson?["renderedResources"]?.Values<string>() ?? new string[] { });
 				result["resources"] = BuildResourcesJson(Context, rn => !renderedResources.Contains(rn));
 			}
 			else

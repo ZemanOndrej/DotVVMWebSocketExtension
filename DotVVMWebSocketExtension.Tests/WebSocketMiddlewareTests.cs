@@ -95,7 +95,7 @@ namespace DotVVMWebSocketExtension.Tests
 			await Task.Delay(500);
 			hubMock.Verify(m => m.OnConnected(websocket.Object));
 			wsm.Verify(m => m.AcceptWebSocketAsync());
-			hubMock.Verify(h => h.ReceiveAsync(websocket.Object, result.Object, ""));
+			hubMock.Verify(h => h.ReceiveMessageAsync(websocket.Object, result.Object, ""));
 		}
 	}
 }

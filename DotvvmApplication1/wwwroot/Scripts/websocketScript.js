@@ -22,7 +22,7 @@ function connect() {
 
 		if (resultObject.type) {
 
-			dotvvm.viewModelObservables[viewModelName]().Hub().SocketId(resultObject.socketId);
+			dotvvm.viewModelObservables[viewModelName]().Hub().CurrentSocketId(resultObject.socketId);
 			return;
 		}
 

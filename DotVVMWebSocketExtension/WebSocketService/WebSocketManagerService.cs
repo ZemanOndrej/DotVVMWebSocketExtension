@@ -68,13 +68,13 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			return id;
 		}
 
-		public string CreateNewGroup(string id)
+		public string CreateNewGroup(string groupId)
 		{
-			if (string.IsNullOrEmpty(id))
+			if (string.IsNullOrEmpty(groupId) || SocketGroups.ContainsKey(groupId))
 			{
 				return null;
 			}
-			return SocketGroups.TryAdd(id, new HashSet<string>()) ? id : null;
+			return SocketGroups.TryAdd(groupId, new HashSet<string>()) ? groupId : null;
 		}
 
 		public HashSet<string> RemoveGroup(string groupId)

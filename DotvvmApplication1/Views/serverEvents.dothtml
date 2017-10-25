@@ -14,7 +14,8 @@
 	{{value: Text}}
 
 
-	SocketId<{{value: Hub.SocketId}}>
+	SocketId<{{value: Hub.CurrentSocketId}}>
+	GroupId<{{value: Hub.CurrentGroupId}}>
 
 		<dot:RequiredResource Name="websocketScript" />
 

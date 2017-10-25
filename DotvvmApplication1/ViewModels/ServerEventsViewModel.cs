@@ -24,8 +24,8 @@ namespace DotvvmApplication1.ViewModels
 			Task.Run(() => LongTaskAsync( new Progress<string>(async value =>
 			{
 				Text = value;
-				//				await Hub.SendMessageAsync(value);
-				await Hub.UpdateYourViewModelOnClient();
+				//				await Hub.SendMessageToClientAsync(value);
+				await Hub.UpdateCurrentViewModelOnClient();
 			})));
 		}
 

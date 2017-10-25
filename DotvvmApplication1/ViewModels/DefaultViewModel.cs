@@ -31,9 +31,8 @@ namespace DotvvmApplication1.ViewModels
 		public async Task SendMessage()
 		{
 			Messages.Add(Message);
-			Console.WriteLine(Context.HttpContext.GetItem<string>("socketId"));
 
-			await Hub.UpdateViewModelOnAllClients(Context);
+			await Hub.UpdateCurrentViewModelOnClient();
 		}
 
 		public void Sum()

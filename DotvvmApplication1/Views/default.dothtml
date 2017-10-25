@@ -16,7 +16,8 @@
 	
 
 
-	SocketId<{{value: Hub.SocketId}}>
+	SocketId<{{value: Hub.CurrentSocketId}}>
+	GroupId<{{value: Hub.CurrentGroupId}}>
 	<dot:TextBox Text="{value: Message}" placeholder="Enter your text" />
 
 

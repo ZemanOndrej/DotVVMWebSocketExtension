@@ -27,7 +27,7 @@ namespace DotvvmApplication1.Hubs
 			await base.OnDisconnected(socket);
 		}
 
-		public override async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string message)
+		public override async Task ReceiveMessageAsync(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
 			await SendMessageToAllAsync($"{WebSocketManagerService.GetSocketId(socket)} said: {message}");
 		}

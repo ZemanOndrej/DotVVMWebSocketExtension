@@ -57,7 +57,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		{
 			if (result.MessageType == WebSocketMessageType.Text)
 			{
-				await Hub.ReceiveAsync(socket, result, message);
+				await Hub.ReceiveMessageAsync(socket, result, message);
 			}
 			else if (result.MessageType == WebSocketMessageType.Close)
 			{
