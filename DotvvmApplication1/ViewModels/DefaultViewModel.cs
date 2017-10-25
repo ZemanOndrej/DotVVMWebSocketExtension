@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DotvvmApplication1.Hubs;
 using DotVVM.Framework.ViewModel;
 using DotVVMWebSocketExtension.WebSocketService;
 
@@ -32,7 +33,7 @@ namespace DotvvmApplication1.ViewModels
 			Messages.Add(Message);
 			Console.WriteLine(Context.HttpContext.GetItem<string>("socketId"));
 
-			await Hub.UpdateViewModelOnClient(Context);
+			await Hub.UpdateViewModelOnAllClients(Context);
 		}
 
 		public void Sum()

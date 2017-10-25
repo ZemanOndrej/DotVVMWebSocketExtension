@@ -1,23 +1,24 @@
 ﻿var uri = "ws://" + window.location.host + "/ws";
-
+var wsCount = 0;
 function connect() {
 	var socket = new WebSocket(uri);
 	socket.onopen = function(event) {
 		console.log("opened connection to " + uri + "; ");
-		console.log("connected", event.data);
 	};
 	socket.onclose = function(event) {
 		console.log("closed connection from " + uri);
 	};
 	socket.onmessage = function(event) {
-//		console.log("onmessage", event);
+		console.log("onmessage", event.data);
+		wsCount++;
+		console.log(wsCount);
 
 		var viewModelName = "root";//TODO
 		var resultObject = JSON.parse(event.data);
 
-		console.log("RootViewModel", Object.keys(dotvvm.viewModels));
-		console.log("Root", Object.keys(dotvvm.viewModelObservables));
-		console.log(resultObject, "result");
+//		console.log("RootViewModel", Object.keys(dotvvm.viewModels));
+//		console.log("Root", Object.keys(dotvvm.viewModelObservables));
+//		console.log(resultObject, "result");
 
 		if (resultObject.type) {
 
@@ -64,15 +65,6 @@ function connect() {
 
 	}
 	
-}
-
-function sleep(milliseconds) {
-	var start = new Date().getTime();
-	for (var i = 0; i < 1e7; i++) {
-		if ((new Date().getTime() - start) > milliseconds) {
-			break;
-		}
-	}
 }
 
 connect();

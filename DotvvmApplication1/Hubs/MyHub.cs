@@ -3,14 +3,16 @@ using System.Threading.Tasks;
 using DotVVM.Framework.Hosting;
 using DotVVM.Framework.ViewModel.Serialization;
 using DotVVMWebSocketExtension.WebSocketService;
-using Microsoft.AspNetCore.Http;
 
-namespace DotvvmApplication1
+namespace DotvvmApplication1.Hubs
 {
 	public class MyHub : WebSocketHub
 	{
-		public MyHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer viewModelSerializer, IDotvvmRequestContext context)
-			: base(webSocketManagerService, viewModelSerializer, context){}
+		public MyHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer viewModelSerializer,
+			IDotvvmRequestContext context, IViewModelSerializationMapper mapper)
+			: base(webSocketManagerService, viewModelSerializer, context,mapper)
+		{
+		}
 
 		public override async Task OnConnected(WebSocket socket)
 		{

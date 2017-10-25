@@ -16,11 +16,13 @@ namespace DotVVMWebSocketExtension.Tests
 		[Fact]
 		public async Task NotAWebsocketRequestTest()
 		{
+			var contextMock = new Mock<HttpContext>();
+			var dotvvmCon = new Mock<DotvvmRequestContext>();
+
 			var hubMock =
-				new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, new Mock<IViewModelSerializer>().Object);
+				new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, new Mock<IViewModelSerializer>().Object, dotvvmCon.Object, new Mock<IViewModelSerializationMapper>().Object);
 			var requestMock = new Mock<HttpRequest>();
 			var ws = new Mock<WebSocketManager>();
-			var contextMock = new Mock<HttpContext>();
 			hubMock.Setup(s => s.OnConnected(new Mock<WebSocket>().Object)).Throws(new Exception("should not have been called"));
 			contextMock.Setup(x => x.Request).Returns(requestMock.Object);
 			contextMock.SetupGet(p => p.WebSockets).Returns(ws.Object);
@@ -35,11 +37,13 @@ namespace DotVVMWebSocketExtension.Tests
 		[Fact]
 		public async Task WebSocketClogingTest()
 		{
+			var dotvvmCon = new Mock<DotvvmRequestContext>();
+
+			var contextMock = new Mock<HttpContext>();
 			var hubMock =
-				new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, new Mock<IViewModelSerializer>().Object);
+				new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, new Mock<IViewModelSerializer>().Object, dotvvmCon.Object, new Mock<IViewModelSerializationMapper>().Object);
 			var requestMock = new Mock<HttpRequest>();
 			var wsm = new Mock<WebSocketManager>();
-			var contextMock = new Mock<HttpContext>();
 			var websocket = new Mock<WebSocket>();
 
 
@@ -65,11 +69,13 @@ namespace DotVVMWebSocketExtension.Tests
 		[Fact]
 		public async Task WebSocketTextMessageTest()
 		{
+			var dotvvmCon = new Mock<DotvvmRequestContext>();
+
+			var contextMock = new Mock<HttpContext>();
 			var hubMock =
-				new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, new Mock<IViewModelSerializer>().Object);
+				new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, new Mock<IViewModelSerializer>().Object, dotvvmCon.Object, new Mock<IViewModelSerializationMapper>().Object);
 			var requestMock = new Mock<HttpRequest>();
 			var wsm = new Mock<WebSocketManager>();
-			var contextMock = new Mock<HttpContext>();
 			var websocket = new Mock<WebSocket>();
 			var result = new Mock<WebSocketReceiveResult>(123, WebSocketMessageType.Text, true);
 			var buffer = new byte[1024 * 4];

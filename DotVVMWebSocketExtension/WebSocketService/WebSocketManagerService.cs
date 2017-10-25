@@ -10,10 +10,15 @@ namespace DotVVMWebSocketExtension.WebSocketService
 {
 	public class WebSocketManagerService
 	{
-		public ConcurrentDictionary<string, WebSocket> Sockets { get; } = new ConcurrentDictionary<string, WebSocket>();
+		public ConcurrentDictionary<string, WebSocket> Sockets { get; }
 
-		public ConcurrentDictionary<string, HashSet<string>> SocketGroups { get; } =
-			new ConcurrentDictionary<string, HashSet<string>>();
+		public ConcurrentDictionary<string, HashSet<string>> SocketGroups { get; }
+
+		public WebSocketManagerService()
+		{
+			SocketGroups = new ConcurrentDictionary<string, HashSet<string>>();
+			Sockets = new ConcurrentDictionary<string, WebSocket>();
+		}
 
 		public WebSocket GetWebSocketById(string id)
 		{
@@ -26,9 +31,20 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			return Sockets.FirstOrDefault(p => p.Value == socket).Key;
 		}
 
-		public void AddSocket(WebSocket socket)
+		public string AddSocket(WebSocket socket)
 		{
-			Sockets.TryAdd(socket.SubProtocol ?? Guid.NewGuid().ToString(), socket);
+			var guid = Guid.NewGuid().ToString();
+
+			return AddSocket(socket, guid);
+		}
+
+		public string AddSocket(WebSocket socket, string id)
+		{
+			if (!string.IsNullOrEmpty(id))
+			{
+				return Sockets.TryAdd(id, socket) ? id : null;
+			}
+			return null;
 		}
 
 		public async Task RemoveSocket(string socketId)
@@ -45,10 +61,26 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public async Task RemoveSocket(WebSocket socket) => await RemoveSocket(GetSocketId(socket));
 
-		public HashSet<string> GetAllSocketsFromGroup(string socketGroupId)
+		public string CreateNewGroup()
 		{
-			SocketGroups.TryGetValue(socketGroupId, out var resultList);
-			return resultList;
+			var id = Guid.NewGuid().ToString();
+			SocketGroups.TryAdd(id, new HashSet<string>());
+			return id;
+		}
+
+		public string CreateNewGroup(string id)
+		{
+			if (string.IsNullOrEmpty(id))
+			{
+				return null;
+			}
+			return SocketGroups.TryAdd(id, new HashSet<string>()) ? id : null;
+		}
+
+		public HashSet<string> RemoveGroup(string groupId)
+		{
+			var ok = SocketGroups.TryRemove(groupId, out var res);
+			return ok ? res : null;
 		}
 
 		public void AddSocketToGroup(string socketId, string groupId)
@@ -59,6 +91,8 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
+		public void AddSocketToGroup(WebSocket socket, string groupId) => AddSocketToGroup(GetSocketId(socket), groupId);
+
 		public void RemoveSocketFromGroup(string socketId, string groupId)
 		{
 			if (SocketGroups.TryGetValue(groupId, out var templist))
@@ -66,5 +100,8 @@ namespace DotVVMWebSocketExtension.WebSocketService
 				templist.Remove(socketId);
 			}
 		}
+
+		public void RemoveSocketFromGroup(WebSocket socket, string groupId) =>
+			RemoveSocketFromGroup(GetSocketId(socket), groupId);
 	}
 }

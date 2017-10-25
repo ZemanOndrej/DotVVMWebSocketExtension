@@ -1,3 +1,4 @@
+using DotvvmApplication1.Hubs;
 using DotVVMWebSocketExtension.WebSocketService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,6 +27,7 @@ namespace DotvvmApplication1
 			// use DotVVM
 			var dotvvmConfiguration = app.UseDotVVM<DotvvmStartup>(env.ContentRootPath);
 			app.UseWebSockets();
+			app.MapWebSocketService("/ws", app.ApplicationServices.GetService<ServerEventHub>());
 			app.MapWebSocketService("/ws", app.ApplicationServices.GetService<MyHub>());
 			app.UseStaticFiles();
 		}
