@@ -1,25 +1,18 @@
 ﻿@viewModel DotvvmApplication1.ViewModels.ServerEventsViewModel, DotvvmApplication1
+@masterPage Views/masterpage.dotmaster
 
-<!DOCTYPE html>
-
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="utf-8" />
-    <title></title>
-</head>
-<body>
+<dot:Content ContentPlaceHolderID="MainContent">
 
 	<dot:Button Click="{command: StartLongTask()}">StartAction</dot:Button>
 
 	{{value: Text}}
 
 
-	SocketId<{{value: Hub.CurrentSocketId}}>
-	GroupId<{{value: Hub.CurrentGroupId}}>
+	SocketId
+	<{{value: Hub.CurrentSocketId}}>
+		GroupId<{{value: Hub.CurrentGroupId}}>
 
-		<dot:RequiredResource Name="websocketScript" />
-
-</body>
-</html>
+			<dot:RequiredResource Name="websocketScript" />
+</dot:Content>
 
 

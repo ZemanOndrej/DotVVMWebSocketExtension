@@ -1,0 +1,13 @@
+﻿@viewModel DotvvmApplication1.ViewModels.TestpageViewModel, DotvvmApplication1
+@masterPage Views/masterpage.dotmaster
+
+<dot:Content ContentPlaceHolderID="MainContent">
+
+
+	<dot:TextBox Text="{value: A}" Type="Number" />+
+	<dot:TextBox Text="{value: B}" Type="Number" />=
+	<dot:Button Click="{command: Sum()}">Sum</dot:Button>
+	{{value: C}}
+
+</dot:Content>
+

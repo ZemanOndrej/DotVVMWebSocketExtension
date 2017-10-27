@@ -16,7 +16,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
-	public abstract class WebSocketHub
+	public class WebSocketHub
 	{
 		protected readonly WebSocketManagerService WebSocketManagerService;
 		protected readonly IViewModelSerializer serializer;
@@ -123,24 +123,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 			var result = new JObject();
 			result["viewModel"] = writer.Token;
-//			result["url"] = Context.HttpContext?.Request?.Url?.PathAndQuery;// TODO wtf
-			result["virtualDirectory"] = Context.HttpContext?.Request?.PathBase?.Value?.Trim('/') ?? "";
-			if (Context.ResultIdFragment != null)
-			{
-				result["resultIdFragment"] = Context.ResultIdFragment;
-			}
-			if (Context.IsPostBack || Context.IsSpaRequest)
-			{
-				result["action"] = "successfulCommand";
-				var renderedResources =
-					new HashSet<string>(Context.ReceivedViewModelJson?["renderedResources"]?.Values<string>() ?? new string[] { });
-				result["resources"] = BuildResourcesJson(Context, rn => !renderedResources.Contains(rn));
-			}
-			else
-			{
-				result["renderedResources"] = JArray.FromObject(Context.ResourceManager.RequiredResources);
-			}
-
+			result["action"] = "successfulCommand";
 			Context.ViewModelJson = result;
 		}
 

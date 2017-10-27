@@ -1,40 +1,26 @@
 ﻿@viewModel DotvvmApplication1.ViewModels.DefaultViewModel, DotvvmApplication1
+@masterPage Views/masterpage.dotmaster
 
-<!DOCTYPE html>
-
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:dot="http://www.w3.org/1999/html">
-<head>
-    <meta charset="utf-8" />
-    <title></title>
-</head>
-<body>
-	<dot:TextBox Text="{value: A}"  Type="Number"/>+
-	<dot:TextBox Text="{value: B}"  Type="Number"/>=
+<dot:Content ContentPlaceHolderID="MainContent">
+	<dot:TextBox Text="{value: A}" Type="Number" />+
+	<dot:TextBox Text="{value: B}" Type="Number" />=
 	<dot:Button Click="{command: Sum()}">Sum</dot:Button>
 	{{value: C}}
 
-	
 
+	SocketId
+	<{{value: Hub.CurrentSocketId}}>
+		GroupId<{{value: Hub.CurrentGroupId}}>
+			<dot:TextBox Text="{value: Message}" placeholder="Enter your text" />
 
-	SocketId<{{value: Hub.CurrentSocketId}}>
-	GroupId<{{value: Hub.CurrentGroupId}}>
-	<dot:TextBox Text="{value: Message}" placeholder="Enter your text" />
+			<dot:Repeater DataSource="{value: Messages}">
+				<ItemTemplate>
+					<p>{{value: _this}}</p>
+				</ItemTemplate>
+			</dot:Repeater>
 
-
-	<dot:Repeater DataSource="{value: Messages}">
-		<ItemTemplate>
-			<p>{{value: _this}}</p>
-		</ItemTemplate>
-	</dot:Repeater>
-
-
-
-	<dot:Button Click="{command: SendMessage()}">Send</dot:Button>
-
-	<dot:RequiredResource Name="websocketScript" />
-
-
-</body>
-</html>
+			<dot:Button Click="{command: SendMessage()}">Send</dot:Button>
+			<dot:RequiredResource Name="websocketScript" />
+</dot:Content>
 
 

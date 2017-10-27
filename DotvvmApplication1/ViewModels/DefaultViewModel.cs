@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotvvmApplication1.Hubs;
 using DotVVM.Framework.ViewModel;
-using DotVVMWebSocketExtension.WebSocketService;
 
 namespace DotvvmApplication1.ViewModels
 {
-
-	public class DefaultViewModel : DotvvmViewModelBase
+	public class DefaultViewModel : MasterpageViewModel
 	{
 		public int A { get; set; }
 		public int B { get; set; }
@@ -24,14 +22,11 @@ namespace DotvvmApplication1.ViewModels
 		{
 			Messages = new List<string>();
 			Hub = hub;
-			
-			
 		}
 
 		public async Task SendMessage()
 		{
 			Messages.Add(Message);
-
 			await Hub.UpdateCurrentViewModelOnClient();
 		}
 

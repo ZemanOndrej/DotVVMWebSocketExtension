@@ -1,5 +1,6 @@
 ﻿var uri = "ws://" + window.location.host + "/ws";
 var wsCount = 0;
+var viewModelName = "root";
 function connect() {
 	var socket = new WebSocket(uri);
 	socket.onopen = function(event) {
@@ -13,13 +14,7 @@ function connect() {
 		wsCount++;
 		console.log(wsCount);
 
-		var viewModelName = "root";//TODO
 		var resultObject = JSON.parse(event.data);
-
-//		console.log("RootViewModel", Object.keys(dotvvm.viewModels));
-//		console.log("Root", Object.keys(dotvvm.viewModelObservables));
-//		console.log(resultObject, "result");
-
 		if (resultObject.type) {
 
 			dotvvm.viewModelObservables[viewModelName]().Hub().CurrentSocketId(resultObject.socketId);

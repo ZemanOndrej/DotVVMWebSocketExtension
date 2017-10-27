@@ -9,13 +9,10 @@ namespace DotvvmApplication1.Hubs
 {
 	public class ServerEventHub : WebSocketHub
 	{
-		public ServerEventHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer serializer,
-			IDotvvmRequestContext context, IViewModelSerializationMapper mapper) : base(webSocketManagerService, serializer, context,mapper)
+		protected ServerEventHub(WebSocketManagerService webSocketManagerService, IViewModelSerializer serializer,
+			IDotvvmRequestContext context, IViewModelSerializationMapper mapper)
+			: base(webSocketManagerService, serializer, context, mapper)
 		{
 		}
-
-
-
-
 	}
 }

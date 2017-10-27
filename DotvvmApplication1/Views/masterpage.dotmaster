@@ -1,0 +1,24 @@
+﻿@viewModel DotvvmApplication1.ViewModels.MasterpageViewModel, DotvvmApplication1
+
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+
+
+
+	{{value: Kappucino}}
+	<dot:RouteLink RouteName="Event">Home</dot:RouteLink>
+	<dot:RouteLink RouteName="Default">Default</dot:RouteLink>
+	<dot:RouteLink RouteName="TestPage">TestPage</dot:RouteLink>
+ 
+    <dot:ContentPlaceHolder ID="MainContent" />
+
+</body>
+</html>
+
+

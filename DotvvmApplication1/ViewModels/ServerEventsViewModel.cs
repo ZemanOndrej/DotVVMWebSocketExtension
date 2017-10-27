@@ -6,7 +6,7 @@ using DotVVM.Framework.ViewModel;
 
 namespace DotvvmApplication1.ViewModels
 {
-	public class ServerEventsViewModel : DotvvmViewModelBase
+	public class ServerEventsViewModel : MasterpageViewModel
 	{
 		public ServerEventHub Hub { get; set; }
 		public string Text { get; set; }
@@ -24,7 +24,6 @@ namespace DotvvmApplication1.ViewModels
 			Task.Run(() => LongTaskAsync( new Progress<string>(async value =>
 			{
 				Text = value;
-				//				await Hub.SendMessageToClientAsync(value);
 				await Hub.UpdateCurrentViewModelOnClient();
 			})));
 		}
