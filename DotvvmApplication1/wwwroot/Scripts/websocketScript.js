@@ -2,9 +2,11 @@
 
 var initWs = () => {
 	var viewModelName = "root";
+	console.log(dotvvm.viewModels[viewModelName].viewModel.Hub());
+	console.log("path", dotvvm.viewModels[viewModelName].viewModel.Hub().SocketPath());
 	var uri = "ws://" + window.location.host + dotvvm.viewModels[viewModelName].viewModel.Hub().SocketPath();
 	var wsCount = 0;
-	console.log(dotvvm.viewModels[viewModelName].viewModel.Hub().SocketPath());
+
 
 	function connect() {
 		var socket = new WebSocket(uri);
