@@ -8,7 +8,7 @@ namespace DotvvmApplication1.ViewModels
 {
 	public class ServerEventsViewModel : MasterpageViewModel
 	{
-		public ServerEventHub Hub { get; set; }
+		public ServerEventHub Hub { get; set; }// TODO NAME OF HUB VARIABLE
 		public string Text { get; set; }
 
 		public ServerEventsViewModel(ServerEventHub hub)

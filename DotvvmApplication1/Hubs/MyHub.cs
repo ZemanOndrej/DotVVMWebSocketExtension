@@ -9,8 +9,8 @@ namespace DotvvmApplication1.Hubs
 	public class MyHub : WebSocketHub
 	{
 		public MyHub(WebSocketManagerService webSocketManagerService, WebSocketViewModelSerializer viewModelSerializer,
-			IDotvvmRequestContext context)
-			: base(webSocketManagerService, viewModelSerializer, context)
+			IDotvvmRequestContext context, WebSocketConfiguration conf)
+			: base(webSocketManagerService, viewModelSerializer, context,conf)
 		{
 		}
 
