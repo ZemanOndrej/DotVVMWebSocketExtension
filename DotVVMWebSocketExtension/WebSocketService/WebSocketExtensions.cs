@@ -12,6 +12,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		{
 			services.TryAddSingleton<WebSocketManagerService>();
 			services.TryAddSingleton<WebSocketViewModelSerializer>();
+			services.TryAddSingleton<WebSocketConfiguration>();
 
 			foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
 			{
@@ -25,6 +26,8 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public static IApplicationBuilder MapWebSocketService(this IApplicationBuilder app, PathString path, WebSocketHub hub)
 		{
+			var conf =app.ApplicationServices.GetService<WebSocketConfiguration>();
+			conf.WebsocketPaths.Add(hub.GetType(),path);
 			return app.Map(path, a => a.UseMiddleware<WebSocketMiddleware>(hub));
 		}
 	}

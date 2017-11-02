@@ -1,9 +1,12 @@
 ﻿using DotVVM.Framework.Hosting;
 using System;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder.Internal;
 using Newtonsoft.Json;
 
 namespace DotVVMWebSocketExtension.WebSocketService
@@ -17,13 +20,18 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public string CurrentSocketId { get; set; }
 		public string CurrentGroupId { get; set; }
+//		public string SocketPath { get; } //TODO
 
 		protected WebSocketHub(WebSocketManagerService webSocketManagerService, WebSocketViewModelSerializer serializer,
-			IDotvvmRequestContext context)
+			IDotvvmRequestContext context, WebSocketConfiguration conf)
 		{
+
 			WebSocketManagerService = webSocketManagerService;
 			this.serializer = serializer;
 			Context = context;
+//			if (context == null) return;
+//			conf.WebsocketPaths.TryGetValue(GetType(), out var socketPath);
+//			SocketPath = socketPath.Value;
 		}
 
 		public virtual async Task OnConnected(WebSocket socket)

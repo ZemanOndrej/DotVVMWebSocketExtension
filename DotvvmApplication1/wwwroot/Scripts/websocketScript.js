@@ -1,18 +1,22 @@
 ﻿
 
-var initWs= ()=> {
-	var uri = "ws://" + window.location.host + "/ws";
-	var wsCount = 0;
+var initWs = () => {
 	var viewModelName = "root";
+	var uri = "ws://" + window.location.host + dotvvm.viewModels[viewModelName].viewModel.Hub().SocketPath();
+	var wsCount = 0;
+	console.log(dotvvm.viewModels[viewModelName].viewModel.Hub().SocketPath());
+
 	function connect() {
 		var socket = new WebSocket(uri);
-		socket.onopen = function (event) {
+		dotvvm.websocket = socket;
+
+		socket.onopen = function(event) {
 			console.log("opened connection to " + uri + "; ");
 		};
-		socket.onclose = function (event) {
+		socket.onclose = function(event) {
 			console.log("closed connection from " + uri);
 		};
-		socket.onmessage = function (event) {
+		socket.onmessage = function(event) {
 			console.log("onmessage", event.data);
 			wsCount++;
 			console.log(wsCount);
@@ -63,8 +67,8 @@ var initWs= ()=> {
 
 		}
 
-		window.onbeforeunload = function () {
-			socket.onclose = function () { }; // disable onclose handler first
+		window.onbeforeunload = function() {
+			socket.onclose = function() {};
 			socket.close();
 		};
 
