@@ -19,7 +19,6 @@ namespace DotvvmApplication1.ViewModels
 
 		public void StartLongTask()
 		{
-			Text = "event is starting";
 
 			Hub.CreateAndRunTask(LongTaskAsync, new Progress<string>(async value =>
 			{
@@ -31,14 +30,17 @@ namespace DotvvmApplication1.ViewModels
 
 		public async Task LongTaskAsync(IProgress<string> progressHandler, CancellationToken token)
 		{
+			progressHandler.Report("Task is starting");
+
 			for (int i = 0; i < 5; ++i)
 			{
-				 await Task.Delay(1000);
-
+				 await Task.Delay(500);
+									   
 				token.ThrowIfCancellationRequested();
 
 				progressHandler.Report("Stage " + i);
 				Console.WriteLine("stage " + i);
+				await Task.Delay(500);
 
 			}
 			progressHandler.Report("Task is Complete");
