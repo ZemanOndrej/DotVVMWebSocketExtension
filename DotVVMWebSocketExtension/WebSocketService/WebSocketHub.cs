@@ -20,7 +20,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public string CurrentSocketId { get; set; }
 		public string CurrentGroupId { get; set; }
-//		public string SocketPath { get; } //TODO
+		public string SocketPath { get; set; } //TODO
 
 		protected WebSocketHub(WebSocketManagerService webSocketManagerService, WebSocketViewModelSerializer serializer,
 			IDotvvmRequestContext context, WebSocketConfiguration conf)
@@ -29,9 +29,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			WebSocketManagerService = webSocketManagerService;
 			this.serializer = serializer;
 			Context = context;
-//			if (context == null) return;
-//			conf.WebsocketPaths.TryGetValue(GetType(), out var socketPath);
-//			SocketPath = socketPath.Value;
+			if (context == null) return;
+			conf.WebsocketPaths.TryGetValue(GetType(), out var socketPath);
+			SocketPath = socketPath.Value;
 		}
 
 		public virtual async Task OnConnected(WebSocket socket)
