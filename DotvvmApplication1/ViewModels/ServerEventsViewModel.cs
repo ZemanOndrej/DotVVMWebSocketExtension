@@ -21,26 +21,32 @@ namespace DotvvmApplication1.ViewModels
 		{
 			Text = "event is starting";
 
-			Task.Run(() => LongTaskAsync( new Progress<string>(async value =>
+			Hub.CreateAndRunTask(LongTaskAsync, new Progress<string>(async value =>
 			{
 				Text = value;
 				await Hub.UpdateCurrentViewModelOnClient();
-			})));
+			}));
+
 		}
 
-		public void LongTaskAsync(IProgress<string> progressHandler)
+		public async Task LongTaskAsync(IProgress<string> progressHandler, CancellationToken token)
 		{
-			for (int i = 0; i < 100; ++i)
+			for (int i = 0; i < 5; ++i)
 			{
+				 await Task.Delay(1000);
 
-				Thread.Sleep(50);
+				token.ThrowIfCancellationRequested();
 
 				progressHandler.Report("Stage " + i);
 				Console.WriteLine("stage " + i);
 
-				Thread.Sleep(50);
 			}
 			progressHandler.Report("Task is Complete");
+		}
+
+		public void StopTask()
+		{
+			Hub.StopTask();
 		}
 	}
 }

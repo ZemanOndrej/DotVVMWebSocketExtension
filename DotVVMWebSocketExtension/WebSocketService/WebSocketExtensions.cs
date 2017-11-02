@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
@@ -9,16 +10,16 @@ namespace DotVVMWebSocketExtension.WebSocketService
 	{
 		public static IServiceCollection AddWebSocketManagerService(this IServiceCollection services)
 		{
-			services.AddSingleton<WebSocketManagerService>();
+			services.TryAddSingleton<WebSocketManagerService>();
+			services.TryAddSingleton<WebSocketViewModelSerializer>();
 
 			foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
 			{
 				if (type.GetTypeInfo().BaseType == typeof(WebSocketHub))
 				{
-					services.AddScoped(type);
+					services.TryAddScoped(type);
 				}
 			}
-
 			return services;
 		}
 

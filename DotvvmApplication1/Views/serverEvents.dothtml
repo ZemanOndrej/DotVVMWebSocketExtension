@@ -11,8 +11,9 @@
 	SocketId
 	<{{value: Hub.CurrentSocketId}}>
 		GroupId<{{value: Hub.CurrentGroupId}}>
+	<dot:Button Click="{command: StopTask()}">stop</dot:Button>
 
-			<dot:RequiredResource Name="websocketScript" />
+	<dot:RequiredResource Name="websocketScript" />
 </dot:Content>
 
 

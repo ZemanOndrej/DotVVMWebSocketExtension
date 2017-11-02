@@ -14,10 +14,13 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public ConcurrentDictionary<string, HashSet<string>> SocketGroups { get; }
 
+		public ConcurrentDictionary<string, HashSet<Tuple<Task, CancellationTokenSource>>> TaskList { get; }
+
 		public WebSocketManagerService()
 		{
 			SocketGroups = new ConcurrentDictionary<string, HashSet<string>>();
 			Sockets = new ConcurrentDictionary<string, WebSocket>();
+			TaskList = new ConcurrentDictionary<string, HashSet<Tuple<Task, CancellationTokenSource>>>();
 		}
 
 		public WebSocket GetWebSocketById(string id)
@@ -57,6 +60,37 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 
 			await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed Peacefully", CancellationToken.None);
+		}
+
+		public void AddTask(string socketId, Task task, CancellationTokenSource token)
+		{
+			if (TaskList.ContainsKey(socketId))
+			{
+				if (TaskList.TryGetValue(socketId, out var set))
+				{
+					set.Add(new Tuple<Task, CancellationTokenSource>(task, token));
+				}
+			}
+			else
+			{
+				TaskList.TryAdd(socketId,
+					new HashSet<Tuple<Task, CancellationTokenSource>> {new Tuple<Task, CancellationTokenSource>(task, token)});
+			}
+		}
+
+
+		public CancellationTokenSource GetCancellationToken(string socketId)
+		{
+			TaskList.TryGetValue(socketId, out var set);
+
+			return set.First().Item2;
+		}
+
+		public void StopTaskForSocket(string socketId)
+		{
+			TaskList.TryGetValue(socketId, out var set);
+			set.First().Item2.Cancel();
+			set.Clear();
 		}
 
 		public async Task RemoveSocket(WebSocket socket) => await RemoveSocket(GetSocketId(socket));
