@@ -1,4 +1,5 @@
 # BcThesis-DotVVMExtension
 ## TODO
-* name of the viewmodel on frontend
+* hub property in viewmodel and socket path on frontend
 * better resource management
+* unit tests
