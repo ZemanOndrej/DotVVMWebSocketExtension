@@ -1,8 +1,6 @@
-using System;
+using DotVVMWebSocketExtension.WebSocketService;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DotvvmApplication1.Hubs;
-using DotVVM.Framework.ViewModel;
 
 namespace DotvvmApplication1.ViewModels
 {
@@ -12,13 +10,13 @@ namespace DotvvmApplication1.ViewModels
 		public int B { get; set; }
 		public int C { get; set; }
 
-		public MyHub Hub { get; set; }
+		public WebSocketHub Hub { get; set; }
 
 		public List<string> Messages { get; set; }
 		public string Message { get; set; }
 
 
-		public DefaultViewModel(MyHub hub)
+		public DefaultViewModel(WebSocketHub hub)
 		{
 			Messages = new List<string>();
 			Hub = hub;

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -12,23 +10,15 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		{
 			services.TryAddSingleton<WebSocketManagerService>();
 			services.TryAddSingleton<WebSocketViewModelSerializer>();
-			services.TryAddSingleton<WebSocketConfiguration>();
+			services.TryAddScoped<WebSocketHub>();
 
-			foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
-			{
-				if (type.GetTypeInfo().BaseType == typeof(WebSocketHub))
-				{
-					services.TryAddScoped(type);
-				}
-			}
+
 			return services;
 		}
 
-		public static IApplicationBuilder MapWebSocketService(this IApplicationBuilder app, PathString path, WebSocketHub hub)
+		public static IApplicationBuilder MapWebSocketService(this IApplicationBuilder app)
 		{
-			var conf =app.ApplicationServices.GetService<WebSocketConfiguration>();
-			conf.WebsocketPaths.Add(hub.GetType(),path);
-			return app.Map(path, a => a.UseMiddleware<WebSocketMiddleware>(hub));
+			return app.Map("/ws", a => a.UseMiddleware<WebSocketMiddleware>());
 		}
 	}
 }
