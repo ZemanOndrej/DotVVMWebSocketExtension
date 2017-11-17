@@ -27,6 +27,7 @@ namespace DotvvmApplication1.ViewModels
 
 		public async Task LongTaskAsync(IProgress<string> progressHandler, CancellationToken token)
 		{
+			await Task.Delay(15);
 			progressHandler.Report("Task is starting");
 
 			for (int i = 0; i < 5; ++i)

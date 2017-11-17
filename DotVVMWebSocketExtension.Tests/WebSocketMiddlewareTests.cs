@@ -6,8 +6,8 @@ using DotVVM.Framework.Hosting;
 using DotVVM.Framework.ViewModel.Serialization;
 using DotVVMWebSocketExtension.WebSocketService;
 using Microsoft.AspNetCore.Http;
-using Xunit;
 using Moq;
+using Xunit;
 
 namespace DotVVMWebSocketExtension.Tests
 {
@@ -18,10 +18,11 @@ namespace DotVVMWebSocketExtension.Tests
 		{
 			var contextMock = new Mock<HttpContext>();
 			var dotvvmCon = new Mock<DotvvmRequestContext>();
+			var serializer = new Mock<WebSocketViewModelSerializer>(new Mock<IViewModelSerializationMapper>().Object);
 
-			var hubMock =
-				new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, new Mock<IViewModelSerializer>().Object, dotvvmCon.Object, new Mock<IViewModelSerializationMapper>().Object);
+			var hubMock = new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, serializer.Object, dotvvmCon.Object);
 			var requestMock = new Mock<HttpRequest>();
+
 			var ws = new Mock<WebSocketManager>();
 			hubMock.Setup(s => s.OnConnected(new Mock<WebSocket>().Object)).Throws(new Exception("should not have been called"));
 			contextMock.Setup(x => x.Request).Returns(requestMock.Object);
@@ -40,8 +41,9 @@ namespace DotVVMWebSocketExtension.Tests
 			var dotvvmCon = new Mock<DotvvmRequestContext>();
 
 			var contextMock = new Mock<HttpContext>();
-			var hubMock =
-				new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, new Mock<IViewModelSerializer>().Object, dotvvmCon.Object, new Mock<IViewModelSerializationMapper>().Object);
+			var serializer = new Mock<WebSocketViewModelSerializer>(new Mock<IViewModelSerializationMapper>().Object);
+
+			var hubMock = new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, serializer.Object, dotvvmCon.Object);
 			var requestMock = new Mock<HttpRequest>();
 			var wsm = new Mock<WebSocketManager>();
 			var websocket = new Mock<WebSocket>();
@@ -72,8 +74,9 @@ namespace DotVVMWebSocketExtension.Tests
 			var dotvvmCon = new Mock<DotvvmRequestContext>();
 
 			var contextMock = new Mock<HttpContext>();
-			var hubMock =
-				new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, new Mock<IViewModelSerializer>().Object, dotvvmCon.Object, new Mock<IViewModelSerializationMapper>().Object);
+			var serializer = new Mock<WebSocketViewModelSerializer>(new Mock<IViewModelSerializationMapper>().Object);
+
+			var hubMock = new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, serializer.Object, dotvvmCon.Object);
 			var requestMock = new Mock<HttpRequest>();
 			var wsm = new Mock<WebSocketManager>();
 			var websocket = new Mock<WebSocket>();

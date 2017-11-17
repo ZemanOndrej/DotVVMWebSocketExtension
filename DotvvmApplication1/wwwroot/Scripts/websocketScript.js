@@ -3,7 +3,6 @@
 var initWs = () => {
 	var viewModelName = "root";
 	console.log(dotvvm.viewModels[viewModelName].viewModel.Hub());
-//	console.log("path", dotvvm.viewModels[viewModelName].viewModel.Hub().SocketPath());
 	var uri = "ws://" + window.location.host + "/ws";
 	var wsCount = 0;
 

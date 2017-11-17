@@ -86,9 +86,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 				try
 				{
 					serializer.BuildViewModel(Context);
-					Context.ViewModelJson?.Remove("viewModelDiff");
+					var serializedString = serializer.SerializeViewModel(Context);
 
-					await SendMessageToClientAsync(serializer.SerializeViewModel(Context));
+					await SendMessageToClientAsync(serializedString);
 				}
 				catch (WebSocketException e)
 				{

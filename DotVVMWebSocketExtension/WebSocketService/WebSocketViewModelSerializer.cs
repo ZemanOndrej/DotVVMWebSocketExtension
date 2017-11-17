@@ -18,8 +18,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public Formatting JsonFormatting { get; set; }
 		public bool SendDiff { get; set; } = true;
 
-
-
 		public WebSocketViewModelSerializer(IViewModelSerializationMapper mapper)
 		{
 			this.mapper = mapper;
@@ -74,7 +72,29 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		{
 			if (SendDiff && context.ReceivedViewModelJson != null && context.ViewModelJson["viewModel"] != null)
 			{
+				context.ViewModelJson?.Remove("viewModelDiff");
+
+				if (context.ViewModelJson["viewModel"] == null || context.ReceivedViewModelJson["viewModel"]==null || context.ViewModelJson["viewModelDiff"]!=null)
+				{
+					Console.WriteLine("kasdasdad");
+				}
+				try
+				{
 				context.ViewModelJson["viewModelDiff"] = JsonUtils.Diff((JObject)context.ReceivedViewModelJson["viewModel"], (JObject)context.ViewModelJson["viewModel"], true);
+
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine(e);
+					throw;
+				}
+
+				context.ReceivedViewModelJson["viewModel"] =(JObject) context.ViewModelJson["viewModel"];
+				if (context.ReceivedViewModelJson["viewModel"] == null)
+				{
+					Console.WriteLine("kjasdasdasd");
+				}
+
 				context.ViewModelJson.Remove("viewModel");
 			}
 			return context.ViewModelJson.ToString(JsonFormatting);

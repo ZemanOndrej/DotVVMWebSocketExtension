@@ -12,7 +12,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			services.TryAddSingleton<WebSocketViewModelSerializer>();
 			services.TryAddScoped<WebSocketHub>();
 
-
 			return services;
 		}
 
