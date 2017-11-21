@@ -82,7 +82,7 @@ namespace DotVVMWebSocketExtension.Tests
 			var socketMock = new Mock<WebSocket>();
 			service.AddSocket(socketMock.Object, testStr);
 
-			var res = service.GetWebSocketById(testStr);
+			var res = service.GetSocketById(testStr);
 
 			Assert.Equal(res, socketMock.Object);
 		}

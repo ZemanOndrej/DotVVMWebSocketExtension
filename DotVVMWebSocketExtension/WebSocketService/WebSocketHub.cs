@@ -10,6 +10,8 @@ namespace DotVVMWebSocketExtension.WebSocketService
 {
 	public class WebSocketHub
 	{
+		#region PropertiesAndConstructor
+
 		protected readonly WebSocketManagerService WebSocketManagerService;
 		protected readonly IDotvvmRequestContext Context;
 		protected readonly WebSocketViewModelSerializer serializer;
@@ -25,6 +27,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			Context = context;
 		}
 
+		#endregion
+
+		#region Connect/Disconnect
+
+		
+
 		public virtual async Task OnConnected(WebSocket socket)
 		{
 			WebSocketManagerService.AddSocket(socket);
@@ -35,8 +43,11 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public virtual async Task OnDisconnected(WebSocket socket)
 		{
+			WebSocketManagerService.StopAllTasksForSocket(socket);
+
 			await WebSocketManagerService.RemoveSocket(socket);
 		}
+		#endregion
 
 		public virtual async Task ReceiveMessageAsync(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
@@ -55,12 +66,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public async Task SendMessageToSocketAsync(string socketId, string message)
 		{
-			await SendMessageToSocketAsync(WebSocketManagerService.GetWebSocketById(socketId), message);
+			await SendMessageToSocketAsync(WebSocketManagerService.GetSocketById(socketId), message);
 		}
 
 		public async Task SendMessageToClientAsync(string message)
 		{
-			await SendMessageToSocketAsync(WebSocketManagerService.GetWebSocketById(CurrentSocketId), message);
+			await SendMessageToSocketAsync(WebSocketManagerService.GetSocketById(CurrentSocketId), message);
 		}
 
 		public async Task SendMessageToAllAsync(string message)
@@ -97,16 +108,20 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
-		public void CreateAndRunTask(Func<Progress<string>, CancellationToken, Task> func, Progress<string> progress)
+		public string CreateAndRunTask(Func<Progress<string>, CancellationToken, Task> func, Progress<string> progress)
 		{
 			var tokenSource = new CancellationTokenSource();
-			WebSocketManagerService.AddTask(CurrentSocketId, Task.Run(() => func.Invoke(progress, tokenSource.Token)),
+			return WebSocketManagerService.AddTask(CurrentSocketId, Task.Run(() => func.Invoke(progress, tokenSource.Token)),
 				tokenSource);
 		}
 
 		public void StopTask()
 		{
-			WebSocketManagerService.StopTaskForSocket(CurrentSocketId);
+			WebSocketManagerService.StopAllTasksForSocket(CurrentSocketId);
+		}
+
+		public async Task GetViewModelFromClientAsync()
+		{
 		}
 	}
 }
