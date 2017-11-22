@@ -13,7 +13,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 {
 	public class WebSocketViewModelSerializer
 	{
-
 		protected readonly IViewModelSerializationMapper mapper;
 		public Formatting JsonFormatting { get; set; }
 		public bool SendDiff { get; set; } = true;
@@ -21,7 +20,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public WebSocketViewModelSerializer(IViewModelSerializationMapper mapper)
 		{
 			this.mapper = mapper;
-			JsonFormatting =  Formatting.None;
+			JsonFormatting = Formatting.None;
 		}
 
 		public void BuildViewModel(IDotvvmRequestContext context)
@@ -74,14 +73,15 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			{
 				context.ViewModelJson?.Remove("viewModelDiff");
 
-				if (context.ViewModelJson["viewModel"] == null || context.ReceivedViewModelJson["viewModel"]==null || context.ViewModelJson["viewModelDiff"]!=null)
+				if (context.ViewModelJson["viewModel"] == null || context.ReceivedViewModelJson["viewModel"] == null ||
+				    context.ViewModelJson["viewModelDiff"] != null)
 				{
 					Console.WriteLine("kasdasdad");
 				}
 				try
 				{
-				context.ViewModelJson["viewModelDiff"] = JsonUtils.Diff((JObject)context.ReceivedViewModelJson["viewModel"], (JObject)context.ViewModelJson["viewModel"], true);
-
+					context.ViewModelJson["viewModelDiff"] = JsonUtils.Diff((JObject) context.ReceivedViewModelJson["viewModel"],
+						(JObject) context.ViewModelJson["viewModel"], true);
 				}
 				catch (Exception e)
 				{
@@ -89,7 +89,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 					throw;
 				}
 
-				context.ReceivedViewModelJson["viewModel"] =(JObject) context.ViewModelJson["viewModel"];
+				context.ReceivedViewModelJson["viewModel"] = (JObject) context.ViewModelJson["viewModel"];
 				if (context.ReceivedViewModelJson["viewModel"] == null)
 				{
 					Console.WriteLine("kjasdasdasd");
@@ -108,7 +108,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			return result.ToString(JsonFormatting);
 		}
 
-		
 
 		public JObject BuildResourcesJson(IDotvvmRequestContext context, Func<string, bool> predicate)
 		{
