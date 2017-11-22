@@ -2,6 +2,7 @@ using DotVVM.Framework;
 using DotVVM.Framework.Configuration;
 using DotVVM.Framework.ResourceManagement;
 using DotVVM.Framework.Routing;
+using DotVVMWebSocketExtension.WebSocketService;
 
 namespace DotvvmApplication1
 {
@@ -34,9 +35,9 @@ namespace DotvvmApplication1
         {
 			// register custom resources and adjust paths to the built-in resources
 
-			config.Resources.Register("websocketScript", new ScriptResource()
+			config.Resources.Register("websocketScript", new ScriptResource
 			{
-				Location = new UrlResourceLocation("~/Scripts/websocketScript.js"),
+				Location = new EmbeddedResourceLocation(typeof(WebSocketMiddleware).Assembly, "DotVVMWebSocketExtension.Resources.websocketScript.js"),
 				Dependencies = new string[0]
 			});
 		}

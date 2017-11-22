@@ -18,6 +18,12 @@
         </Content>
     </ItemGroup>
     <ItemGroup>
+      <Compile Remove="wwwroot\Scripts\**" />
+      <Content Remove="wwwroot\Scripts\**" />
+      <EmbeddedResource Remove="wwwroot\Scripts\**" />
+      <None Remove="wwwroot\Scripts\**" />
+    </ItemGroup>
+    <ItemGroup>
         <None Remove="dotvvm_serialized_config.json.tmp" />
     </ItemGroup>
     <ItemGroup>
@@ -28,10 +34,10 @@
         <DotNetCliToolReference Include="DotVVM.Compiler.Light" Version="1.1.5" />
     </ItemGroup>
     <ItemGroup>
-      <None Include="wwwroot\Scripts\websocketScript.js" />
-    </ItemGroup>
-    <ItemGroup>
       <ProjectReference Include="..\DotVVMWebSocketExtension\DotVVMWebSocketExtension.csproj" />
       <ProjectReference Include="..\dotvvm\src\DotVVM.Framework\DotVVM.Framework.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="wwwroot\" />
     </ItemGroup>
 </Project>
