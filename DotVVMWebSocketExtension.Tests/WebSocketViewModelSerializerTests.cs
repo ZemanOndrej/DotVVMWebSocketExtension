@@ -13,32 +13,36 @@ namespace DotVVMWebSocketExtension.Tests
 {
 	public class WebSocketViewModelSerializerTests
 	{
+		public Mock<IViewModelSerializationMapper> mapper { get; set; }
+		public Mock<DotvvmRequestContext>context { get; set; }
+		public WebSocketViewModelSerializer serializer { get; set; }
+
+
+		public WebSocketViewModelSerializerTests()
+		{
+			mapper = new Mock<IViewModelSerializationMapper>();
+			context = new Mock<DotvvmRequestContext>();
+			serializer = new WebSocketViewModelSerializer(mapper.Object);
+		}
+
 		[Fact]
 		public void Test()
 		{
-			var mapper = new Mock<ViewModelSerializationMapper>();
-			var context = new Mock<DotvvmRequestContext>();
-			var serializer = new WebSocketViewModelSerializer(mapper.Object);
 
 			throw new NotImplementedException();
-			serializer.BuildViewModel(context.Object);
 		}
 
 		[Fact]
 		public void TestSerializeViewModelWithDiff()
 		{
-			var mapper = new Mock<IViewModelSerializationMapper>();
-			var context = new Mock<IDotvvmRequestContext>();
-			var serializer = new WebSocketViewModelSerializer(mapper.Object);
 			var received = CreateRecieveJObject();
 			var currentView = CreateViewModelJObject();
-			serializer.SendDiff = true;
 
 			context.SetupGet(c => c.ViewModelJson).Returns(currentView);
 			context.SetupGet(s => s.ReceivedViewModelJson).Returns(received);
 			Assert.NotNull(context.Object.ViewModelJson["viewModel"]);
 
-			var str =serializer.SerializeViewModel(context.Object);
+			var str = serializer.SerializeViewModel(context.Object);
 			Assert.Equal("{\"action\":\"successfulCommand\",\"viewModelDiff\":{\"Text\":\"Stage 3\"}}", str);
 			Assert.Null(context.Object.ViewModelJson["viewModel"]);
 			Assert.DoesNotContain("\"viewModel\"", str);
