@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace DotvvmApplication1.ViewModels
 {
-	public class DefaultViewModel : MasterpageViewModel
+	public class ChatViewModel : MasterpageViewModel
 	{
 		public int A { get; set; }
 		public int B { get; set; }
@@ -16,16 +16,20 @@ namespace DotvvmApplication1.ViewModels
 		public string Message { get; set; }
 
 
-		public DefaultViewModel(WebSocketHub hub)
+		public ChatViewModel(WebSocketHub hub)
 		{
-			Messages = new List<string>();
+			Messages = new List<string> {"welcome to the chat"};
 			Hub = hub;
 		}
 
 		public async Task SendMessage()
 		{
-			Messages.Add(Message);
-			await Hub.UpdateCurrentViewModelOnClient();
+			if (!string.IsNullOrEmpty(Message))
+			{
+				Messages.Add(Message);
+				await Hub.UpdateCurrentViewModelOnClient();
+				Message = "";
+			}
 		}
 
 		public void Sum()

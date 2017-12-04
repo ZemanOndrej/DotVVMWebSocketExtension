@@ -21,6 +21,7 @@ namespace DotvvmApplication1
             config.RouteTable.Add("Default", "def", "Views/default.dothtml");
 			config.RouteTable.Add("Event","","Views/serverEvents.dothtml");
 			config.RouteTable.Add("TestPage","testPage","Views/testPage.dothtml");
+			config.RouteTable.Add("Calculator","calculator","Views/simpleCalculator.dothtml");
 
             // Uncomment the following line to auto-register all dothtml files in the Views folder
             // config.RouteTable.AutoDiscoverRoutes(new DefaultRouteStrategy(config));    

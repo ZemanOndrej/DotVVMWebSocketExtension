@@ -5,7 +5,11 @@
 
 	<dot:Button Click="{command: StartLongTask()}">StartAction</dot:Button>
 
-	{{value: Text}}
+	<div Visible="{value: IsPercentageVisible}">
+		<span>Percentage: {{value: Percentage}}</span>
+		<span>Text:{{value: Text}}</span>
+	</div>
+	
 
 
 	SocketId

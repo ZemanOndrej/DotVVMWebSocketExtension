@@ -1,4 +1,4 @@
-﻿@viewModel DotvvmApplication1.ViewModels.DefaultViewModel, DotvvmApplication1
+﻿@viewModel DotvvmApplication1.ViewModels.ChatViewModel, DotvvmApplication1
 @masterPage Views/masterpage.dotmaster
 
 <dot:Content ContentPlaceHolderID="MainContent">
@@ -8,10 +8,12 @@
 	{{value: C}}
 
 
-	SocketId
-	<{{value: Hub.CurrentSocketId}}>
-		GroupId<{{value: Hub.CurrentGroupId}}>
+	SocketId<{{value: Hub.CurrentSocketId}}> GroupId<{{value: Hub.CurrentGroupId}}>
+
+		<div>
 			<dot:TextBox Text="{value: Message}" placeholder="Enter your text" />
+			<dot:Button Click="{command: SendMessage()}">Send</dot:Button>
+
 
 			<dot:Repeater DataSource="{value: Messages}">
 				<ItemTemplate>
@@ -19,7 +21,8 @@
 				</ItemTemplate>
 			</dot:Repeater>
 
-			<dot:Button Click="{command: SendMessage()}">Send</dot:Button>
+		</div>
+			
 			<dot:RequiredResource Name="websocketScript" />
 </dot:Content>
 

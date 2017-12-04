@@ -31,8 +31,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#region Connect/Disconnect
 
-		
-
 		public virtual async Task OnConnected(WebSocket socket)
 		{
 			WebSocketManagerService.AddSocket(socket);
@@ -47,6 +45,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 			await WebSocketManagerService.RemoveSocket(socket);
 		}
+
 		#endregion
 
 		public virtual async Task ReceiveMessageAsync(WebSocket socket, WebSocketReceiveResult result, string message)
@@ -54,6 +53,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			await SendMessageToSocketAsync(socket,
 				$"Your Message was recieved, socketid&{WebSocketManagerService.GetSocketId(socket)}, message: &{message}");
 		}
+
+
+		#region Send/Update ViewModel
 
 		public async Task SendMessageToSocketAsync(WebSocket socket, string message)
 		{
@@ -108,10 +110,14 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
-		public string CreateAndRunTask(Func<Progress<string>, CancellationToken, Task> func, Progress<string> progress)
+		#endregion
+
+		#region TaskManagement
+
+		public string CreateAndRunTask(Func< CancellationToken, Task> func)
 		{
 			var tokenSource = new CancellationTokenSource();
-			return WebSocketManagerService.AddTask(CurrentSocketId, Task.Run(() => func.Invoke(progress, tokenSource.Token)),
+			return WebSocketManagerService.AddTask(CurrentSocketId, Task.Run(() => func.Invoke( tokenSource.Token)),
 				tokenSource);
 		}
 
@@ -119,6 +125,8 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		{
 			WebSocketManagerService.StopAllTasksForSocket(CurrentSocketId);
 		}
+
+		#endregion
 
 		public async Task GetViewModelFromClientAsync()
 		{

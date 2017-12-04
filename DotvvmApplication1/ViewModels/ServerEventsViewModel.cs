@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using DotVVMWebSocketExtension.WebSocketService;
 
@@ -9,38 +8,40 @@ namespace DotvvmApplication1.ViewModels
 	{
 		public WebSocketHub Hub { get; set; } // TODO NAME OF HUB VARIABLE
 		public string Text { get; set; }
+		public long Percentage { get; set; }
+		public bool IsPercentageVisible { get; set; }
+
 
 		public ServerEventsViewModel(WebSocketHub hub)
 		{
 			Hub = hub;
 			Text = "No action";
+			IsPercentageVisible = false;
 		}
 
 		public void StartLongTask()
 		{
-			Hub.CreateAndRunTask(LongTaskAsync, new Progress<string>(async value =>
-			{
-				Text = value;
-				await Hub.UpdateCurrentViewModelOnClient();
-			}));
+			Hub.CreateAndRunTask(LongTaskAsync);
 		}
 
-		public async Task LongTaskAsync(IProgress<string> progressHandler, CancellationToken token)
+		public async Task LongTaskAsync( CancellationToken token)
 		{
-			await Task.Delay(15);
-			progressHandler.Report("Task is starting");
-
-			for (int i = 0; i < 5; ++i)
+			IsPercentageVisible = true;
+			await Hub.UpdateCurrentViewModelOnClient();
+			Percentage = 0;
+			for (int i = 0; i < 10; ++i)
 			{
-				await Task.Delay(500);
+				await Task.Delay(101);
 
 				token.ThrowIfCancellationRequested();
 
-				progressHandler.Report("Stage " + i);
-				Console.WriteLine("stage " + i);
-				await Task.Delay(500);
+				Percentage = i;
+				await Hub.UpdateCurrentViewModelOnClient();
+				await Task.Delay(100);
 			}
-			progressHandler.Report("Task is Complete");
+			Text = "Task is Complete";
+			IsPercentageVisible = false;
+			await Hub.UpdateCurrentViewModelOnClient();
 		}
 
 		public void StopTask()
