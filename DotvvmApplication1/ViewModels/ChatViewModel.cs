@@ -6,20 +6,18 @@ namespace DotvvmApplication1.ViewModels
 {
 	public class ChatViewModel : MasterpageViewModel
 	{
-		public int A { get; set; }
-		public int B { get; set; }
-		public int C { get; set; }
-
 		public WebSocketHub Hub { get; set; }
 
 		public List<string> Messages { get; set; }
 		public string Message { get; set; }
+		public string GroupId { get; set; }
 
 
 		public ChatViewModel(WebSocketHub hub)
 		{
-			Messages = new List<string> {"welcome to the chat"};
+			Messages = new List<string> ();
 			Hub = hub;
+			GroupId = "1337";
 		}
 
 		public async Task SendMessage()
@@ -27,14 +25,25 @@ namespace DotvvmApplication1.ViewModels
 			if (!string.IsNullOrEmpty(Message))
 			{
 				Messages.Add(Message);
-				await Hub.UpdateCurrentViewModelOnClient();
+				await Hub.SendViewModelToGroup();
 				Message = "";
+				await Hub.UpdateViewModelOnClient();
+				Context.InterruptRequest();//todo
 			}
 		}
 
-		public void Sum()
+		public void CreateGroup()
 		{
-			C = A + B;
+
+			Hub.CreateGroup(GroupId);
 		}
+
+		public void JoinGroup()
+		{
+			Hub.JoinGroup(GroupId);
+
+			Messages.Add("you have joined group "+GroupId);
+		}
+
 	}
 }

@@ -2,13 +2,11 @@
 @masterPage Views/masterpage.dotmaster
 
 <dot:Content ContentPlaceHolderID="MainContent">
-	<dot:TextBox Text="{value: A}" Type="Number" />+
-	<dot:TextBox Text="{value: B}" Type="Number" />=
-	<dot:Button Click="{command: Sum()}">Sum</dot:Button>
-	{{value: C}}
-
 
 	SocketId<{{value: Hub.CurrentSocketId}}> GroupId<{{value: Hub.CurrentGroupId}}>
+	<dot:Button Click="{command: CreateGroup()}">Create</dot:Button>
+	<dot:Button Click="{command: JoinGroup()}">Join</dot:Button>
+
 
 		<div>
 			<dot:TextBox Text="{value: Message}" placeholder="Enter your text" />

@@ -18,7 +18,7 @@ namespace DotvvmApplication1
 
         private void ConfigureRoutes(DotvvmConfiguration config, string applicationPath)
         {
-            config.RouteTable.Add("Default", "def", "Views/default.dothtml");
+            config.RouteTable.Add("Chat", "chat", "Views/ChatPage.dothtml");
 			config.RouteTable.Add("Event","","Views/serverEvents.dothtml");
 			config.RouteTable.Add("TestPage","testPage","Views/testPage.dothtml");
 			config.RouteTable.Add("Calculator","calculator","Views/simpleCalculator.dothtml");

@@ -166,26 +166,15 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		#region GroupManagement
 
 		/// <summary>
-		/// Creates the new group.
-		/// </summary>
-		/// <returns> ID</returns>
-		public string CreateNewGroup()
-		{
-			var id = Guid.NewGuid().ToString();
-			SocketGroups.TryAdd(id, new HashSet<string>());
-			return id;
-		}
-
-		/// <summary>
 		/// Creates the new group with Id
 		/// </summary>
 		/// <param name="groupId">The group identifier.</param>
 		/// <returns>ID</returns>
-		public string CreateNewGroup(string groupId)
+		public string CreateNewGroup(string groupId = null)
 		{
 			if (string.IsNullOrEmpty(groupId) || SocketGroups.ContainsKey(groupId))
 			{
-				return null;
+				groupId = Guid.NewGuid().ToString();
 			}
 			return SocketGroups.TryAdd(groupId, new HashSet<string>()) ? groupId : null;
 		}

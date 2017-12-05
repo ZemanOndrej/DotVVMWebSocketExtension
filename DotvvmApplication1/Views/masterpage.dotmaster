@@ -10,10 +10,8 @@
 <body>
 
 
-
-	{{value: Kappucino}}
-	<dot:RouteLink RouteName="Event">Home</dot:RouteLink>
-	<dot:RouteLink RouteName="Default">Default</dot:RouteLink>
+	<dot:RouteLink RouteName="Event">ServerEvents</dot:RouteLink>
+	<dot:RouteLink RouteName="Chat">Chat</dot:RouteLink>
 	<dot:RouteLink RouteName="TestPage">TestPage</dot:RouteLink>
  
     <dot:ContentPlaceHolder ID="MainContent" />

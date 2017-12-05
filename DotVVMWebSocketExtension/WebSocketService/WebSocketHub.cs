@@ -12,18 +12,18 @@ namespace DotVVMWebSocketExtension.WebSocketService
 	{
 		#region PropertiesAndConstructor
 
-		protected readonly WebSocketManagerService WebSocketManagerService;
+		protected readonly WebSocketManagerService WebSocketService;
 		protected readonly IDotvvmRequestContext Context;
-		protected readonly WebSocketViewModelSerializer serializer;
+		protected readonly WebSocketViewModelSerializer Serializer;
 
 		public string CurrentSocketId { get; set; }
 		public string CurrentGroupId { get; set; }
 
-		public WebSocketHub(WebSocketManagerService webSocketManagerService, WebSocketViewModelSerializer serializer,
+		public WebSocketHub(WebSocketManagerService webSocketService, WebSocketViewModelSerializer serializer,
 			IDotvvmRequestContext context)
 		{
-			WebSocketManagerService = webSocketManagerService;
-			this.serializer = serializer;
+			WebSocketService = webSocketService;
+			Serializer = serializer;
 			Context = context;
 		}
 
@@ -33,17 +33,17 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public virtual async Task OnConnected(WebSocket socket)
 		{
-			WebSocketManagerService.AddSocket(socket);
-			CurrentSocketId = WebSocketManagerService.GetSocketId(socket);
+			WebSocketService.AddSocket(socket);
+			CurrentSocketId = WebSocketService.GetSocketId(socket);
 			await SendMessageToSocketAsync(socket,
 				JsonConvert.SerializeObject(new {socketId = CurrentSocketId, type = "webSocketInit"}, Formatting.None));
 		}
 
 		public virtual async Task OnDisconnected(WebSocket socket)
 		{
-			WebSocketManagerService.StopAllTasksForSocket(socket);
+			WebSocketService.StopAllTasksForSocket(socket);
 
-			await WebSocketManagerService.RemoveSocket(socket);
+			await WebSocketService.RemoveSocket(socket);
 		}
 
 		#endregion
@@ -51,7 +51,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public virtual async Task ReceiveMessageAsync(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
 			await SendMessageToSocketAsync(socket,
-				$"Your Message was recieved, socketid&{WebSocketManagerService.GetSocketId(socket)}, message: &{message}");
+				$"Your Message was recieved, socketid&{WebSocketService.GetSocketId(socket)}, message: &{message}");
 		}
 
 
@@ -68,43 +68,64 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public async Task SendMessageToSocketAsync(string socketId, string message)
 		{
-			await SendMessageToSocketAsync(WebSocketManagerService.GetSocketById(socketId), message);
+			await SendMessageToSocketAsync(WebSocketService.GetSocketById(socketId), message);
 		}
 
 		public async Task SendMessageToClientAsync(string message)
 		{
-			await SendMessageToSocketAsync(WebSocketManagerService.GetSocketById(CurrentSocketId), message);
+			await SendMessageToSocketAsync(WebSocketService.GetSocketById(CurrentSocketId), message);
 		}
 
 		public async Task SendMessageToAllAsync(string message)
 		{
-			foreach (var pair in WebSocketManagerService.Sockets)
+			foreach (var pair in WebSocketService.Sockets)
 			{
 				await SendMessageToSocketAsync(pair.Value, message);
 			}
 		}
 
-		public async Task SentMessageToGroup(string groupId, string message)
-		{
-			foreach (var socketId in WebSocketManagerService.SocketGroups[groupId])
-			{
-				await SendMessageToSocketAsync(socketId, message);
-			}
-		}
-
-		public async Task UpdateCurrentViewModelOnClient()
+		public async Task SendViewModelToGroup()
 		{
 			if (Context != null)
 			{
+				Serializer.BuildViewModel(Context);
+				var serializedString = Serializer.SerializeViewModel(Context);
 				try
 				{
-					serializer.BuildViewModel(Context);
-					var serializedString = serializer.SerializeViewModel(Context);
+					foreach (var socketId in WebSocketService.SocketGroups[CurrentGroupId])
+					{
+						if (socketId != CurrentSocketId)
+						{
+							await SendMessageToSocketAsync(socketId, serializedString);
+						}
+					}
+				}
+				catch (WebSocketException e)
+				{
+					var socket = WebSocketService.GetSocketById(CurrentSocketId);
+					await socket.CloseAsync(WebSocketCloseStatus.InternalServerError, "server error", CancellationToken.None);
+					await OnDisconnected(socket);
+					Console.WriteLine(e);
+				}
+//				Context.InterruptRequest(); //todo zrusit 
+			}
+		}
 
+		public async Task UpdateViewModelOnClient()
+		{
+			if (Context != null)
+			{
+				Serializer.BuildViewModel(Context);
+				var serializedString = Serializer.SerializeViewModel(Context);
+				try
+				{
 					await SendMessageToClientAsync(serializedString);
 				}
 				catch (WebSocketException e)
 				{
+					var socket = WebSocketService.GetSocketById(CurrentSocketId);
+					await socket.CloseAsync(WebSocketCloseStatus.InternalServerError, "server error", CancellationToken.None);
+					await OnDisconnected(socket);
 					Console.WriteLine(e);
 				}
 			}
@@ -112,18 +133,37 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#endregion
 
+		#region GroupManagement
+
+		public string CreateGroup(string groupId = null) => WebSocketService.CreateNewGroup(groupId);
+
+		public void JoinGroup(string groupId)
+		{
+			WebSocketService.AddSocketToGroup(CurrentSocketId, groupId);
+			CurrentGroupId = groupId;
+		}
+
+		public void CreateAndJoinGroup(string groupId = null)
+		{
+			var group = WebSocketService.CreateNewGroup(groupId);
+			WebSocketService.AddSocketToGroup(CurrentSocketId, group);
+			CurrentGroupId = group;
+		}
+
+		#endregion
+
 		#region TaskManagement
 
-		public string CreateAndRunTask(Func< CancellationToken, Task> func)
+		public string CreateAndRunTask(Func<CancellationToken, Task> func)
 		{
 			var tokenSource = new CancellationTokenSource();
-			return WebSocketManagerService.AddTask(CurrentSocketId, Task.Run(() => func.Invoke( tokenSource.Token)),
+			return WebSocketService.AddTask(CurrentSocketId, Task.Run(() => func.Invoke(tokenSource.Token)),
 				tokenSource);
 		}
 
 		public void StopTask()
 		{
-			WebSocketManagerService.StopAllTasksForSocket(CurrentSocketId);
+			WebSocketService.StopAllTasksForSocket(CurrentSocketId);
 		}
 
 		#endregion
