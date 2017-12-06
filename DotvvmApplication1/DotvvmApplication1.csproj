@@ -29,15 +29,15 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.1" />
     </ItemGroup>
     <ItemGroup>
         <DotNetCliToolReference Include="DotVVM.Compiler.Light" Version="1.1.5" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\BL\BL.csproj" />
       <ProjectReference Include="..\DotVVMWebSocketExtension\DotVVMWebSocketExtension.csproj" />
       <ProjectReference Include="..\dotvvm\src\DotVVM.Framework\DotVVM.Framework.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="wwwroot\" />
     </ItemGroup>
 </Project>

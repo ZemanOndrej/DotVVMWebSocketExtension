@@ -35,6 +35,10 @@ namespace DotvvmApplication1.ViewModels
 				await Task.Delay(10);
 
 				token.ThrowIfCancellationRequested();
+//				if (i==50)
+//				{
+//					await Hub.GetViewModelFromClientAsync();
+//				}
 
 				Percentage = i;
 				await Hub.UpdateViewModelOnClient();

@@ -1,18 +1,9 @@
 ﻿@viewModel DotvvmApplication1.ViewModels.SimpleCalculatorViewModel, DotvvmApplication1
+@masterPage Views/masterpage.dotmaster
 
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="utf-8" />
-    <title></title>
-</head>
-<body>
+<dot:Content ContentPlaceHolderID="MainContent">
 	<dot:TextBox Text="{value: A}" Type="Number" />+
 	<dot:TextBox Text="{value: B}" Type="Number" />=
 	<dot:Button Click="{command: Sum()}">Sum</dot:Button>
 	{{value: C}}
-
-</body>
-</html>
-
-
+</dot:Content>

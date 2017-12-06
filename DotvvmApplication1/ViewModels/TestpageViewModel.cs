@@ -1,19 +1,23 @@
 using System;
+using DotVVMWebSocketExtension.WebSocketService;
 
 namespace DotvvmApplication1.ViewModels
 {
     public class TestpageViewModel : MasterpageViewModel
     {
+	    public string Text { get; set; }
 
-	    public int A { get; set; }
-	    public int B { get; set; }
-	    public int C { get; set; }
+		public WebSocketHub Hub { get; set; }
 
-
-	    public void Sum()
+	    public TestpageViewModel(WebSocketHub hub)
 	    {
-		    C = A + B;
+		    Hub = hub;
+	    }
+
+	    public void Start()
+	    {
 		    Console.WriteLine(Context.HttpContext.Request);
+		    var viewModelFromClientAsync = Hub.GetViewModelFromClientAsync();
 	    }
 	}
 }

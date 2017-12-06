@@ -6,7 +6,7 @@ using DotVVM.Framework.ViewModel;
 
 namespace DotvvmApplication1.ViewModels
 {
-    public class SimpleCalculatorViewModel : DotvvmViewModelBase
+    public class SimpleCalculatorViewModel : MasterpageViewModel
     {
 	    public int A { get; set; }
 	    public int B { get; set; }
