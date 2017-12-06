@@ -4,11 +4,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using DotVVM.Framework.Hosting.Middlewares;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
-	public class WebSocketMiddleware : DotvvmMiddlewareBase
+	public class WebSocketMiddleware 
 	{
 		private readonly RequestDelegate _next;
 		private WebSocketHub Hub { get; }
@@ -29,11 +28,11 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			var socket = await context.WebSockets.AcceptWebSocketAsync();
 
 			await Hub.OnConnected(socket);
-			await Receive(socket);
+			await ReceiveMessage(socket);
 			await _next(context);
 		}
 
-		private async Task Receive(WebSocket socket)
+		private async Task ReceiveMessage(WebSocket socket)
 		{
 			var buffer = new byte[1024 * 4];
 
