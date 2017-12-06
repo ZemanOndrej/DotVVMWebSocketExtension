@@ -21,13 +21,29 @@
 			console.log(wsCount);
 
 			var resultObject = JSON.parse(event.data);
-			if (resultObject.type) {
+			switch (resultObject.action) {
+				case "webSocketInit":
+					console.log(resultObject.type);
+					dotvvm.viewModelObservables[viewModelName]().Hub().CurrentSocketId(resultObject.socketId);
+					break;
+				case "successfulCommand":
+					updateViewModel(resultObject);
+					break;
+				case "viewModelSynchronizationRequest":
+					console.log("dsd");
 
-				console.log(resultObject.type);
-				dotvvm.viewModelObservables[viewModelName]().Hub().CurrentSocketId(resultObject.socketId);
-				return;
-			}
-			updateViewModel(resultObject);
+					var viewModel = dotvvm.viewModels[viewModelName].viewModel;
+					var data = {
+						viewModel: dotvvm.serialization.serialize(viewModel, { pathMatcher: function (val) { return context && val === context.$data; } }),
+					};
+
+
+					socket.send(ko.toJSON(data));
+					break;
+				case "pong":
+					console.log("pong message");
+
+			};
 
 
 		};

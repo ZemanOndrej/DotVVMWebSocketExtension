@@ -5,11 +5,12 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
+using DotVVM.Framework.Hosting;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
 	/// <summary>
-	/// service that stores SocketList, SocketGroupList and LongRunningTask list and operations on them
+	/// service that stores SocketList and LongRunningTask list and operations on them
 	/// </summary>
 	public class WebSocketManagerService
 	{
@@ -17,19 +18,17 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public ConcurrentDictionary<string, WebSocket> Sockets { get; }
 
-		public ConcurrentDictionary<string, HashSet<string>> SocketGroups { get; }
 
 		public ConcurrentDictionary<string,
-			HashSet<(Task Task, CancellationTokenSource CancellationTokenSource, string TaskId)>> TaskList { get; }
+			HashSet<(Task Task, string TaskId, CancellationTokenSource CancellationTokenSource,IDotvvmRequestContext Context)>> TaskList { get; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="WebSocketManagerService"/> class.
 		/// </summary>
 		public WebSocketManagerService()
 		{
-			SocketGroups = new ConcurrentDictionary<string, HashSet<string>>();
 			Sockets = new ConcurrentDictionary<string, WebSocket>();
-			TaskList = new ConcurrentDictionary<string, HashSet<(Task, CancellationTokenSource, string)>>();
+			TaskList = new ConcurrentDictionary<string, HashSet<(Task Task, string TaskId, CancellationTokenSource CancellationTokenSource, IDotvvmRequestContext Context)>>();
 		}
 
 		#endregion
@@ -93,11 +92,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		{
 			Sockets.TryRemove(socketId, out var socket);
 
-			foreach (var socketGroup in SocketGroups)
-			{
-				socketGroup.Value.Remove(socketId);
-			}
-
 			await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed Peacefully", CancellationToken.None);
 		}
 
@@ -118,22 +112,23 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <param name="socketId">The socket identifier.</param>
 		/// <param name="task">The task.</param>
 		/// <param name="token">The token.</param>
-		public string AddTask(string socketId, Task task, CancellationTokenSource token)
+		/// <param name="context">Context of HTTP request</param>
+		public string AddTask( Task task,string socketId, CancellationTokenSource token, IDotvvmRequestContext context)
 		{
 			var taskId = Guid.NewGuid().ToString();
 			if (TaskList.ContainsKey(socketId))
 			{
 				if (TaskList.TryGetValue(socketId, out var set))
 				{
-					set.Add((task, token, taskId));
+					set.Add((task,taskId, token, context));
 				}
 			}
 			else
 			{
 				TaskList.TryAdd(socketId,
-					new HashSet<(Task, CancellationTokenSource, string)>
+					new HashSet<(Task, string, CancellationTokenSource,IDotvvmRequestContext)>
 					{
-						(task, token, taskId)
+						(task, taskId, token,context)
 					});
 			}
 			return taskId;
@@ -163,74 +158,5 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#endregion
 
-		#region GroupManagement
-
-		/// <summary>
-		/// Creates the new group with Id
-		/// </summary>
-		/// <param name="groupId">The group identifier.</param>
-		/// <returns>ID</returns>
-		public string CreateNewGroup(string groupId = null)
-		{
-			if (string.IsNullOrEmpty(groupId) || SocketGroups.ContainsKey(groupId))
-			{
-				groupId = Guid.NewGuid().ToString();
-			}
-			return SocketGroups.TryAdd(groupId, new HashSet<string>()) ? groupId : null;
-		}
-
-		/// <summary>
-		/// Removes the group with ID
-		/// </summary>
-		/// <param name="groupId">The group identifier.</param>
-		/// <returns>socket hashSet from deleted group</returns>
-		public HashSet<string> RemoveGroup(string groupId)
-		{
-			var ok = SocketGroups.TryRemove(groupId, out var res);
-			return ok ? res : null;
-		}
-
-		/// <summary>
-		/// Adds the socket to group.
-		/// </summary>
-		/// <param name="socketId">The socket identifier.</param>
-		/// <param name="groupId">The group identifier.</param>
-		public void AddSocketToGroup(string socketId, string groupId)
-		{
-			if (SocketGroups.TryGetValue(groupId, out var templist))
-			{
-				templist.Add(socketId);
-			}
-		}
-
-		/// <summary>
-		/// Adds the socket to group.
-		/// </summary>
-		/// <param name="socket">The socket.</param>
-		/// <param name="groupId">The group identifier.</param>
-		public void AddSocketToGroup(WebSocket socket, string groupId) => AddSocketToGroup(GetSocketId(socket), groupId);
-
-		/// <summary>
-		/// Removes the socket from group.
-		/// </summary>
-		/// <param name="socketId">The socket identifier.</param>
-		/// <param name="groupId">The group identifier.</param>
-		public void RemoveSocketFromGroup(string socketId, string groupId)
-		{
-			if (SocketGroups.TryGetValue(groupId, out var templist))
-			{
-				templist.Remove(socketId);
-			}
-		}
-
-		/// <summary>
-		/// Removes the socket from group.
-		/// </summary>
-		/// <param name="socket">The socket.</param>
-		/// <param name="groupId">The group identifier.</param>
-		public void RemoveSocketFromGroup(WebSocket socket, string groupId) =>
-			RemoveSocketFromGroup(GetSocketId(socket), groupId);
-
-		#endregion
 	}
 }

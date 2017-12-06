@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DotVVM.Framework.Hosting;
+using DotVVM.Framework.Security;
 using DotVVM.Framework.ViewModel.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -11,12 +12,17 @@ namespace DotVVMWebSocketExtension.WebSocketService
 {
 	public class WebSocketViewModelSerializer
 	{
+		private const string GeneralViewModelRecommendations = "Check out general viewModel recommendation at http://www.dotvvm.com/docs/tutorials/basics-viewmodels.";
+
 		protected readonly IViewModelSerializationMapper mapper;
 		public Formatting JsonFormatting { get; set; }
+		private readonly IViewModelProtector viewModelProtector;
 
-		public WebSocketViewModelSerializer(IViewModelSerializationMapper mapper)
+
+		public WebSocketViewModelSerializer(IViewModelSerializationMapper mapper, IViewModelProtector viewModelProtector)
 		{
 			this.mapper = mapper;
+			this.viewModelProtector = viewModelProtector;
 			JsonFormatting = Formatting.None;
 		}
 
@@ -90,30 +96,66 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 
 
-//		public string SerializeModelState(IDotvvmRequestContext context)
-//		{
-//			var result = new JObject();
-//			result["modelState"] = JArray.FromObject(context.ModelState.Errors);
-//			result["action"] = "validationErrors";
-//			return result.ToString(JsonFormatting);
-//		}
+		//		public string SerializeModelState(IDotvvmRequestContext context)
+		//		{
+		//			var result = new JObject();
+		//			result["modelState"] = JArray.FromObject(context.ModelState.Errors);
+		//			result["action"] = "validationErrors";
+		//			return result.ToString(JsonFormatting);
+		//		}
 
 
-//		public JObject BuildResourcesJson(IDotvvmRequestContext context, Func<string, bool> predicate)
-//		{
-//			var manager = context.ResourceManager;
-//			var resourceObj = new JObject();
-//			foreach (var resource in manager.GetNamedResourcesInOrder())
-//			{
-//				if (predicate(resource.Name))
-//				{
-//					using (var str = new StringWriter())
-//					{
-//						resourceObj[resource.Name] = JValue.CreateString(resource.GetRenderedTextCached(context));
-//					}
-//				}
-//			}
-//			return resourceObj;
-//		}
+		//		public JObject BuildResourcesJson(IDotvvmRequestContext context, Func<string, bool> predicate)
+		//		{
+		//			var manager = context.ResourceManager;
+		//			var resourceObj = new JObject();
+		//			foreach (var resource in manager.GetNamedResourcesInOrder())
+		//			{
+		//				if (predicate(resource.Name))
+		//				{
+		//					using (var str = new StringWriter())
+		//					{
+		//						resourceObj[resource.Name] = JValue.CreateString(resource.GetRenderedTextCached(context));
+		//					}
+		//				}
+		//			}
+		//			return resourceObj;
+		//		}
+
+
+		public void PopulateViewModel(IDotvvmRequestContext context, string serializedPostData)
+		{
+
+			// get properties
+			var data = context.ReceivedViewModelJson = JObject.Parse(serializedPostData);
+			var viewModelToken = (JObject)data["viewModel"];
+
+			// load CSRF token
+			context.CsrfToken = viewModelToken["$csrfToken"].Value<string>();
+
+			ViewModelJsonConverter viewModelConverter;
+			if (viewModelToken["$encryptedValues"] != null)
+			{
+				// load encrypted values
+				var encryptedValuesString = viewModelToken["$encryptedValues"].Value<string>();
+				viewModelConverter = new ViewModelJsonConverter(context.IsPostBack, mapper, JObject.Parse(viewModelProtector.Unprotect(encryptedValuesString, context)));
+			}
+			else viewModelConverter = new ViewModelJsonConverter(context.IsPostBack, mapper);
+
+			// get validation path
+			context.ModelState.ValidationTargetPath = data.SelectToken("additionalData.validationTargetPath")?.Value<string>();
+
+			// populate the ViewModel
+			var serializer = CreateJsonSerializer();
+			serializer.Converters.Add(viewModelConverter);
+			try
+			{
+				viewModelConverter.Populate(viewModelToken.CreateReader(), serializer, context.ViewModel);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"Could not deserialize viewModel of type { context.ViewModel.GetType().Name }. {GeneralViewModelRecommendations}", ex);
+			}
+		}
 	}
 }

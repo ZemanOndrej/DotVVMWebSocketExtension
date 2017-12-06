@@ -17,7 +17,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		protected readonly WebSocketViewModelSerializer Serializer;
 
 		public string CurrentSocketId { get; set; }
-		public string CurrentGroupId { get; set; }
+		public string CurrentTaskId { get; set; }
 
 		public WebSocketHub(WebSocketManagerService webSocketService, WebSocketViewModelSerializer serializer,
 			IDotvvmRequestContext context)
@@ -36,7 +36,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			WebSocketService.AddSocket(socket);
 			CurrentSocketId = WebSocketService.GetSocketId(socket);
 			await SendMessageToSocketAsync(socket,
-				JsonConvert.SerializeObject(new {socketId = CurrentSocketId, type = "webSocketInit"}, Formatting.None));
+				JsonConvert.SerializeObject(new {socketId = CurrentSocketId, action = "webSocketInit"}, Formatting.None));
 		}
 
 		public virtual async Task OnDisconnected(WebSocket socket)
@@ -50,8 +50,19 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public virtual async Task ReceiveMessageAsync(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
+
+			Console.WriteLine(WebSocketService.TaskList.Count);
+			var o = JsonConvert.DeserializeObject(message);
+			//TODO taskmanagement
+
 			await SendMessageToSocketAsync(socket,
-				$"Your Message was recieved, socketid&{WebSocketService.GetSocketId(socket)}, message: &{message}");
+				JsonConvert.SerializeObject(
+					new
+					{
+						action = "pong",
+						message = $"Your Message was recieved, socketid&{WebSocketService.GetSocketId(socket)}, message: &{message}"
+					}, Formatting.None)
+			);
 		}
 
 
@@ -84,32 +95,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
-		public async Task SendViewModelToGroup()
-		{
-			if (Context != null)
-			{
-				Serializer.BuildViewModel(Context);
-				var serializedString = Serializer.SerializeViewModel(Context);
-				try
-				{
-					foreach (var socketId in WebSocketService.SocketGroups[CurrentGroupId])
-					{
-						if (socketId != CurrentSocketId)
-						{
-							await SendMessageToSocketAsync(socketId, serializedString);
-						}
-					}
-				}
-				catch (WebSocketException e)
-				{
-					var socket = WebSocketService.GetSocketById(CurrentSocketId);
-					await socket.CloseAsync(WebSocketCloseStatus.InternalServerError, "server error", CancellationToken.None);
-					await OnDisconnected(socket);
-					Console.WriteLine(e);
-				}
-//				Context.InterruptRequest(); //todo zrusit 
-			}
-		}
 
 		public async Task UpdateViewModelOnClient()
 		{
@@ -133,32 +118,16 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#endregion
 
-		#region GroupManagement
-
-		public string CreateGroup(string groupId = null) => WebSocketService.CreateNewGroup(groupId);
-
-		public void JoinGroup(string groupId)
-		{
-			WebSocketService.AddSocketToGroup(CurrentSocketId, groupId);
-			CurrentGroupId = groupId;
-		}
-
-		public void CreateAndJoinGroup(string groupId = null)
-		{
-			var group = WebSocketService.CreateNewGroup(groupId);
-			WebSocketService.AddSocketToGroup(CurrentSocketId, group);
-			CurrentGroupId = group;
-		}
-
-		#endregion
 
 		#region TaskManagement
 
 		public string CreateAndRunTask(Func<CancellationToken, Task> func)
 		{
 			var tokenSource = new CancellationTokenSource();
-			return WebSocketService.AddTask(CurrentSocketId, Task.Run(() => func.Invoke(tokenSource.Token)),
-				tokenSource);
+			return  WebSocketService.AddTask(
+				func.Invoke(tokenSource.Token).ContinueWith(s => StopTask(), tokenSource.Token),
+				CurrentSocketId,
+				tokenSource, Context);
 		}
 
 		public void StopTask()
@@ -170,6 +139,8 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public async Task GetViewModelFromClientAsync()
 		{
+			await SendMessageToSocketAsync(CurrentSocketId,
+				JsonConvert.SerializeObject(new {action = "viewModelSynchronizationRequest"}, Formatting.None));
 		}
 	}
 }

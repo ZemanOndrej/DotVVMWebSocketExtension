@@ -26,8 +26,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 				await _next(context);
 				return;
 			}
-			WebSocket socket;
-			socket = await context.WebSockets.AcceptWebSocketAsync();
+			var socket = await context.WebSockets.AcceptWebSocketAsync();
 
 			await Hub.OnConnected(socket);
 			await Receive(socket);
