@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DAL.Entities
 {
@@ -11,5 +13,9 @@ namespace DAL.Entities
 		public User User { get; set; }
 		[Required]
 		public ChatRoom ChatRoom { get; set; }
+
+		[Required]
+		[Column(TypeName = "datetime2")]
+		public DateTime Time { get; set; }
 	}
 }

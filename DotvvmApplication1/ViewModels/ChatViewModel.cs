@@ -1,6 +1,7 @@
 using System;
 using DotVVMWebSocketExtension.WebSocketService;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BL.DTO;
 using BL.Facades;
@@ -13,23 +14,22 @@ namespace DotvvmApplication1.ViewModels
 		public ChatFacade ChatFacade { get; set; }
 
 		public List<ChatMessageDto> Messages { get; set; }
-		public string NewMessage { get; set; }
-		public ChatRoomDto CurrentRoom { get; set; }
-		public ChatRoomDto NewRoom { get; set; }
-		public bool IsInRoom { get; set; }
 		public UserDto CurrentUser { get; set; }
-		public bool IsLoggedIn { get; set; }
 		public List<ChatRoomDto> ChatRooms { get; set; }
+		public ChatRoomDto CurrentRoom { set; get; }
+		public string NewMessage { get; set; }
+		public string NewRoomName { get; set; }
+		public bool IsInRoom { get; set; }
+		public bool IsLoggedIn { get; set; }
 
 
 		public ChatViewModel(WebSocketHub hub, ChatFacade facade)
 		{
 			ChatFacade = facade;
 			CurrentUser = new UserDto();
-			ChatRooms = ChatFacade.GetAllChatRooms();
+			ChatRooms = new List<ChatRoomDto>();
 			Messages = new List<ChatMessageDto>();
 			CurrentRoom = new ChatRoomDto();
-			NewRoom = new ChatRoomDto();
 
 			Hub = hub;
 		}
@@ -38,6 +38,7 @@ namespace DotvvmApplication1.ViewModels
 		{
 			if (string.IsNullOrEmpty(CurrentUser.Name) || string.IsNullOrEmpty(Hub.CurrentSocketId)) return;
 			CurrentUser.SocketId = Hub.CurrentSocketId;
+			ChatRooms= ChatFacade.GetAllChatRooms();
 			CurrentUser.Id = ChatFacade.CreateUser(CurrentUser);
 			IsLoggedIn = true;
 		}
@@ -50,29 +51,38 @@ namespace DotvvmApplication1.ViewModels
 				{
 					User = CurrentUser,
 					ChatRoomId = CurrentRoom.Id,
-					Message = NewMessage
+					Message = NewMessage,
+					Time = DateTime.Now
 				};
-				await Hub.UpdateViewModelOnClient();
-				NewMessage = "";
-				var id = ChatFacade.SendMessageToChatRoom(msg);
-				Console.WriteLine(id);
-
-
+				//				await Hub.UpdateViewModelOnClient();
+				msg.Id = ChatFacade.SendMessageToChatRoom(msg);
 				Messages.Add(msg);
 //				await Hub.UpdateViewModelOnClient();
+
+				await Hub.SyncViewModelForSockets(
+					ChatFacade.GetAllUsersFromChatRoom(CurrentRoom.Id)
+						.Select(s => s.SocketId)
+						.ToList());
+				NewMessage = "";
+
 //				Context.InterruptRequest();//todo
-				ChatFacade.GetAllUsersFromChatRoom(1);
+//				ChatFacade.GetAllUsersFromChatRoom(1);
 			}
 		}
 
-		public void CreateRoom()
+		public async Task CreateRoom()
 		{
-			if (string.IsNullOrEmpty(NewRoom.Name)) return;
+			if (string.IsNullOrEmpty(NewRoomName)) return;
 
-			NewRoom.Id = ChatFacade.CreateChatRoom(NewRoom);
+			var newChatRoom = new ChatRoomDto{Name = NewRoomName};
+			newChatRoom.Id =ChatFacade.CreateChatRoom(newChatRoom);
 
-			ChatRooms.Add(NewRoom);
-			NewRoom = new ChatRoomDto();
+			ChatRooms.Add(newChatRoom);
+			await Hub.SyncViewModelForSockets(
+				ChatFacade.GetAllConnectedUsers()
+					.Select(s => s.SocketId)
+					.ToList());
+			NewRoomName = "";
 		}
 
 		public void JoinRoom(int id)

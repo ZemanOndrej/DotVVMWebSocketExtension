@@ -1,5 +1,7 @@
 ﻿using DotVVM.Framework.Hosting;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -50,7 +52,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public virtual async Task ReceiveMessageAsync(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
-
 			Console.WriteLine(WebSocketService.TaskList.Count);
 			var o = JsonConvert.DeserializeObject(message);
 			//TODO taskmanagement
@@ -77,15 +78,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
-		public async Task SendMessageToSocketAsync(string socketId, string message)
-		{
+		public async Task SendMessageToSocketAsync(string socketId, string message) =>
 			await SendMessageToSocketAsync(WebSocketService.GetSocketById(socketId), message);
-		}
 
-		public async Task SendMessageToClientAsync(string message)
-		{
+
+		public async Task SendMessageToClientAsync(string message) =>
 			await SendMessageToSocketAsync(WebSocketService.GetSocketById(CurrentSocketId), message);
-		}
 
 		public async Task SendMessageToAllAsync(string message)
 		{
@@ -94,6 +92,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 				await SendMessageToSocketAsync(pair.Value, message);
 			}
 		}
+
+
+
 
 
 		public async Task UpdateViewModelOnClient()
@@ -116,6 +117,32 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
+		public async Task SyncViewModelForSockets(List<string> socketIdList)
+		{
+			foreach (var socketId in socketIdList)
+			{
+				if (socketId != CurrentSocketId)
+				{
+					if (Context != null)
+					{
+						Serializer.BuildViewModel(Context);
+						var serializedString = Serializer.SerializeViewModel(Context);
+						try
+						{
+							await SendMessageToSocketAsync(socketId,serializedString);
+						}
+						catch (WebSocketException e)
+						{
+							var socket = WebSocketService.GetSocketById(socketId);
+							await socket.CloseAsync(WebSocketCloseStatus.InternalServerError, "server error", CancellationToken.None);
+							await OnDisconnected(socket);
+							Console.WriteLine(e);
+						}
+					}
+				}
+			}
+		}
+
 		#endregion
 
 
@@ -124,7 +151,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public string CreateAndRunTask(Func<CancellationToken, Task> func)
 		{
 			var tokenSource = new CancellationTokenSource();
-			return  WebSocketService.AddTask(
+			return WebSocketService.AddTask(
 				func.Invoke(tokenSource.Token).ContinueWith(s => StopTask(), tokenSource.Token),
 				CurrentSocketId,
 				tokenSource, Context);
@@ -140,7 +167,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public async Task GetViewModelFromClientAsync()
 		{
 			await SendMessageToSocketAsync(CurrentSocketId,
-				JsonConvert.SerializeObject(new {action = "viewModelSynchronizationRequest"}, Formatting.None));
+				JsonConvert.SerializeObject(new {action = "viewModelSynchronizationRequest",taskId=CurrentTaskId}, Formatting.None));
 		}
+
+
 	}
 }

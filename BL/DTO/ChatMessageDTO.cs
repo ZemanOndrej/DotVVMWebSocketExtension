@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace BL.DTO
 {
@@ -11,5 +12,8 @@ namespace BL.DTO
 		public UserDto User { get; set; }
 		[Required]
 		public int ChatRoomId { get; set; }
+
+		[Required]
+		public DateTime Time { get; set; }
 	}
 }

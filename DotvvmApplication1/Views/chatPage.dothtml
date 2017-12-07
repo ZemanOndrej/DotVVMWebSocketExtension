@@ -15,7 +15,7 @@
 
 	<div class="{value: !IsLoggedIn ? 'hidden':'nothidden'}">
 
-		<dot:TextBox Text="{value: NewRoom.Name}" placeholder="Enter new chatroom Name" />
+		<dot:TextBox Text="{value: NewRoomName}" placeholder="Enter new chatroom Name" />
 
 		<dot:Button Click="{command: CreateRoom()}">Create</dot:Button>
 
@@ -41,6 +41,7 @@
 			<dot:Repeater DataSource="{value: Messages}">
 				<ItemTemplate>
 					<div>
+						<span>{{value: Time}}</span>
 						<span>{{value: User.Name}}</span>:
 						<span> {{value: Message}}</span>
 					</div>

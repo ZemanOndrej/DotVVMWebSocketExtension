@@ -22,26 +22,27 @@
 
 			var resultObject = JSON.parse(event.data);
 			switch (resultObject.action) {
-				case "webSocketInit":
-					console.log(resultObject.type);
-					dotvvm.viewModelObservables[viewModelName]().Hub().CurrentSocketId(resultObject.socketId);
-					break;
-				case "successfulCommand":
-					updateViewModel(resultObject);
-					break;
-				case "viewModelSynchronizationRequest":
-					console.log("dsd");
+			case "webSocketInit":
+				console.log(resultObject.type);
+				dotvvm.viewModelObservables[viewModelName]().Hub().CurrentSocketId(resultObject.socketId);
+				break;
+			case "successfulCommand":
+				updateViewModel(resultObject);
+				break;
+			case "viewModelSynchronizationRequest":
+				console.log("dsd");
 
-					var viewModel = dotvvm.viewModels[viewModelName].viewModel;
-					var data = {
-						viewModel: dotvvm.serialization.serialize(viewModel, { pathMatcher: function (val) { return context && val === context.$data; } }),
-					};
+				var viewModel = dotvvm.viewModels[viewModelName].viewModel;
+				var data = {
+					viewModel: dotvvm.serialization.serialize(viewModel,
+						{ pathMatcher: function(val) { return context && val === context.$data; } }),
+				};
 
 
-					socket.send(ko.toJSON(data));
-					break;
-				case "pong":
-					console.log("pong message");
+				socket.send(ko.toJSON(data));
+				break;
+			case "pong":
+				console.log("pong message");
 
 			};
 
@@ -61,7 +62,6 @@
 			console.log(resultObject);
 			return;
 		}
-
 
 		if (!resultObject.viewModel && resultObject.viewModelDiff) {
 			resultObject.viewModel = dotvvm.patch(dotvvm.viewModels[viewModelName].viewModel, resultObject.viewModelDiff);

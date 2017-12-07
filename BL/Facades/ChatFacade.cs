@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BL.DTO;
 using DAL;
@@ -33,6 +34,7 @@ namespace BL.Facades
 		}
 
 		public List<ChatRoomDto> GetAllChatRooms() => Mapping.Mapper.Map<List<ChatRoomDto>>(Context.ChatRooms.ToList());
+		public List<UserDto> GetAllConnectedUsers() => Mapping.Mapper.Map<List<UserDto>>(Context.Users.ToList());
 
 		public void AddUserToChatRoom(int roomId, UserDto user)
 		{
@@ -63,7 +65,7 @@ namespace BL.Facades
 
 		public List<ChatMessageDto> GetAllMessagesFromRoom(int id)
 		{
-			var msgs = Context.ChatMessages.Where(c => c.ChatRoom.Id == id).Include(u => u.User).ToList();
+			var msgs = Context.ChatMessages.Where(c => c.ChatRoom.Id == id).OrderByDescending(m=>m.Time).Take(2).Include(u => u.User).ToList();
 			return Mapping.Mapper.Map<List<ChatMessageDto>>(msgs);
 		}
 
@@ -72,6 +74,7 @@ namespace BL.Facades
 		{
 			var message = Mapping.Mapper.Map<ChatMessage>(messageDto);
 
+			message.ChatRoom = Context.ChatRooms.Find(message.ChatRoom.Id);
 			message.User = Context.Users.FirstOrDefault(u => u.Id == message.User.Id);
 			Context.ChatMessages.Add(message);
 			Context.SaveChanges();
