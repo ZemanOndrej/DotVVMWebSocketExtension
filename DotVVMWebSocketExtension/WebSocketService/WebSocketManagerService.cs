@@ -16,19 +16,18 @@ namespace DotVVMWebSocketExtension.WebSocketService
 	{
 		#region PropsAndConstructor
 
-		public ConcurrentDictionary<string, WebSocket> Sockets { get; }
+		public ConcurrentDictionary<string, Connection> Connections { get; }
 
 
-		public ConcurrentDictionary<string,
-			HashSet<(Task Task, string TaskId, CancellationTokenSource CancellationTokenSource,IDotvvmRequestContext Context)>> TaskList { get; }
+		public ConcurrentDictionary<string, HashSet<WebSocketTask>> TaskList { get; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="WebSocketManagerService"/> class.
 		/// </summary>
 		public WebSocketManagerService()
 		{
-			Sockets = new ConcurrentDictionary<string, WebSocket>();
-			TaskList = new ConcurrentDictionary<string, HashSet<(Task Task, string TaskId, CancellationTokenSource CancellationTokenSource, IDotvvmRequestContext Context)>>();
+			Connections = new ConcurrentDictionary<string, Connection>();
+			TaskList = new ConcurrentDictionary<string, HashSet<WebSocketTask>>();
 		}
 
 		#endregion
@@ -40,10 +39,10 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public WebSocket GetSocketById(string id)
+		public Connection GetConnetionById(string id)
 		{
-			Sockets.TryGetValue(id, out WebSocket ws);
-			return ws;
+			Connections.TryGetValue(id, out var connection);
+			return connection;
 		}
 
 		/// <summary>
@@ -51,56 +50,70 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// </summary>
 		/// <param name="socket">The socket.</param>
 		/// <returns></returns>
-		public string GetSocketId(WebSocket socket)
-		{
-			return Sockets.FirstOrDefault(p => p.Value == socket).Key;
-		}
+		public string GetConnectionId(WebSocket socket) => Connections.FirstOrDefault(p => p.Value.Socket == socket).Key;
+		public string GetConnectionId(Connection connection) => GetConnectionId(connection.Socket);
 
 		/// <summary>
-		/// Creates new GUID and calls AddSocket() with that GUID as string
+		/// Creates new GUID and calls AddConnection() with that GUID as string
 		/// </summary>
-		/// <param name="socket">The socket object</param>
+		/// <param name="connection"></param>
 		/// <returns></returns>
-		public string AddSocket(WebSocket socket)
+		public string AddConnection(Connection connection)
 		{
 			var guid = Guid.NewGuid().ToString();
 
-			return AddSocket(socket, guid);
+			return AddConnection(connection, guid);
 		}
 
-		/// <summary>
-		/// Adds the socket to the list with given guid string
-		/// </summary>
-		/// <param name="socket">The socket.</param>
-		/// <param name="id">The identifier.</param>
-		/// <returns></returns>
-		public string AddSocket(WebSocket socket, string id)
+
+		public string AddContext(IDotvvmRequestContext context, string id)
 		{
 			if (!string.IsNullOrEmpty(id))
 			{
-				return Sockets.TryAdd(id, socket) ? id : null;
+				return Connections.TryAdd(id, new Connection(context)) ? id : null;
 			}
 			return null;
 		}
 
 		/// <summary>
-		/// Removes the socket from list and closes connection normally
+		/// Adds the socket to the list with given guid string
 		/// </summary>
-		/// <param name="socketId">The socket identifier.</param>
+		/// <param name="connection"></param>
+		/// <param name="id">The identifier.</param>
 		/// <returns></returns>
-		public async Task RemoveSocket(string socketId)
+		public string AddConnection(Connection connection, string id)
 		{
-			Sockets.TryRemove(socketId, out var socket);
+			if (!string.IsNullOrEmpty(id))
+			{
+				return Connections.TryAdd(id, connection) ? id : null;
+			}
+			return null;
+		}
 
-			await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed Peacefully", CancellationToken.None);
+		public void AddSocketToConnection(string connectionId, WebSocket socket)
+		{
+			GetConnetionById(connectionId).Socket=socket;
 		}
 
 		/// <summary>
-		/// Gets Id of websocket and calls RemoveSocket()
+		/// Removes the socket from list and closes connection normally
+		/// </summary>
+		/// <param name="connectionId">The socket identifier.</param>
+		/// <returns></returns>
+		public void RemoveConnection(string connectionId)
+		{
+			Connections.TryRemove(connectionId, out var connection);
+
+			connection.Dispose();
+		}
+
+		/// <summary>
+		/// Gets Id of websocket and calls RemoveConnection()
 		/// </summary>
 		/// <param name="socket">The socket.</param>
 		/// <returns></returns>
-		public async Task RemoveSocket(WebSocket socket) => await RemoveSocket(GetSocketId(socket));
+		public void RemoveConnection(WebSocket socket) => RemoveConnection(GetConnectionId(socket));
+		public void RemoveConnection(Connection connection) => RemoveConnection(GetConnectionId(connection));
 
 		#endregion
 
@@ -109,26 +122,26 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <summary>
 		/// Adds the task to the list with websocket id and cancellation token
 		/// </summary>
-		/// <param name="socketId">The socket identifier.</param>
+		/// <param name="connectionId">The socket identifier.</param>
 		/// <param name="task">The task.</param>
 		/// <param name="token">The token.</param>
 		/// <param name="context">Context of HTTP request</param>
-		public string AddTask( Task task,string socketId, CancellationTokenSource token, IDotvvmRequestContext context)
+		public string AddTask(Task task, string connectionId, CancellationTokenSource token, IDotvvmRequestContext context)
 		{
 			var taskId = Guid.NewGuid().ToString();
-			if (TaskList.ContainsKey(socketId))
+			if (TaskList.ContainsKey(connectionId))
 			{
-				if (TaskList.TryGetValue(socketId, out var set))
+				if (TaskList.TryGetValue(connectionId, out var set))
 				{
-					set.Add((task,taskId, token, context));
+					set.Add(new WebSocketTask(task, taskId, token, context));
 				}
 			}
 			else
 			{
-				TaskList.TryAdd(socketId,
-					new HashSet<(Task, string, CancellationTokenSource,IDotvvmRequestContext)>
+				TaskList.TryAdd(connectionId,
+					new HashSet<WebSocketTask>
 					{
-						(task, taskId, token,context)
+						new WebSocketTask(task, taskId, token, context)
 					});
 			}
 			return taskId;
@@ -154,9 +167,10 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			set?.Clear();
 		}
 
-		public void StopAllTasksForSocket(WebSocket socket) => StopAllTasksForSocket(GetSocketId(socket));
+		public void StopAllTasksForSocket(WebSocket socket) => StopAllTasksForSocket(GetConnectionId(socket));
 
 		#endregion
+
 
 	}
 }

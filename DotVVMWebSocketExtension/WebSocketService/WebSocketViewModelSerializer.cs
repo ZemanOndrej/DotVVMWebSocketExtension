@@ -70,7 +70,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		}
 
 
-		public string SerializeViewModel(IDotvvmRequestContext context)
+		public string SerializeViewModel(IDotvvmRequestContext context,Connection connection)
 		{
 			if ( context.ReceivedViewModelJson != null && context.ViewModelJson["viewModel"] != null)
 			{
@@ -87,7 +87,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 					throw;
 				}
 
-				context.ReceivedViewModelJson["viewModel"] = (JObject) context.ViewModelJson["viewModel"]; 
+//				context.ReceivedViewModelJson["viewModel"] = (JObject) context.ViewModelJson["viewModel"].DeepClone(); 
 
 				context.ViewModelJson.Remove("viewModel");
 			}

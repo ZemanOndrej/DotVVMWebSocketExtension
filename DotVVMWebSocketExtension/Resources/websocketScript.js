@@ -1,7 +1,8 @@
 ﻿var initWs = function() {
 	var viewModelName = "root";
 	console.log(dotvvm.viewModels[viewModelName].viewModel.Hub());
-	var uri = "ws://" + window.location.host + "/ws";
+	var socketId = dotvvm.viewModels[viewModelName].viewModel.Hub().CurrentSocketId();
+	var uri = "ws://" + window.location.host + "/ws?connectionId="+socketId;
 	var wsCount = 0;
 
 
@@ -30,7 +31,6 @@
 				updateViewModel(resultObject);
 				break;
 			case "viewModelSynchronizationRequest":
-				console.log("dsd");
 
 				var viewModel = dotvvm.viewModels[viewModelName].viewModel;
 				var data = {
@@ -64,7 +64,7 @@
 		}
 
 		if (!resultObject.viewModel && resultObject.viewModelDiff) {
-			resultObject.viewModel = dotvvm.patch(dotvvm.viewModels[viewModelName].viewModel, resultObject.viewModelDiff);
+			resultObject.viewModel = dotvvm.patch(dotvvm.serialization.serialize(dotvvm.viewModels[viewModelName].viewModel), resultObject.viewModelDiff);
 		}
 
 

@@ -28,7 +28,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 			var socket = await context.WebSockets.AcceptWebSocketAsync();
 
-			await Facade.OnConnected(socket);
+			Facade.OnConnected(socket,context.Request.Query["connectionId"].ToString());
 			await HandleWebSocketCommunication(socket);
 			await _next(context);
 		}
@@ -61,7 +61,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 					}
 					else if (result.MessageType == WebSocketMessageType.Close)
 					{
-						await Facade.OnDisconnected(socket);
+						Facade.OnDisconnected(socket);
 					}
 
 				}

@@ -25,15 +25,15 @@ namespace DotVVMWebSocketExtension.Tests
 		{
 			var service = new WebSocketManagerService();
 			var socketMock = new Mock<WebSocket>();
-			var res = service.AddSocket(socketMock.Object, testStr);
+			var res = service.AddConnection(socketMock.Object, testStr);
 
 			var testList = new ConcurrentDictionary<string, WebSocket>();
 			testList.TryAdd(testStr, socketMock.Object);
 
 			Assert.Equal(res, testStr);
-			Assert.Contains(testStr, service.Sockets.Keys);
-			Assert.Contains(socketMock.Object, service.Sockets.Values);
-			Assert.Equal(testList, service.Sockets);
+			Assert.Contains(testStr, service.Connections.Keys);
+			Assert.Contains(socketMock.Object, service.Connections.Values);
+			Assert.Equal(testList, service.Connections);
 		}
 
 		[Fact]
@@ -41,8 +41,8 @@ namespace DotVVMWebSocketExtension.Tests
 		{
 			var service = new WebSocketManagerService();
 			var socketMock = new Mock<WebSocket>();
-			service.AddSocket(socketMock.Object);
-			Assert.Contains(socketMock.Object, service.Sockets.Values);
+			service.AddConnection(socketMock.Object);
+			Assert.Contains(socketMock.Object, service.Connections.Values);
 		}
 
 		[Fact]
@@ -50,13 +50,13 @@ namespace DotVVMWebSocketExtension.Tests
 		{
 			var service = new WebSocketManagerService();
 			var socketMock = new Mock<WebSocket>();
-			service.AddSocket(socketMock.Object, testStr);
+			service.AddConnection(socketMock.Object, testStr);
 			socketMock.Setup(s => s.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed Peacefully", CancellationToken.None))
 				.Returns(Task.FromResult(0));
-			await service.RemoveSocket(socketMock.Object);
+			await service.ConnectionSocket(socketMock.Object);
 			socketMock.Verify(s =>
 				s.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed Peacefully", CancellationToken.None));
-			Assert.DoesNotContain(testStr, service.Sockets.Keys);
+			Assert.DoesNotContain(testStr, service.Connections.Keys);
 		}
 
 		[Fact]
@@ -64,12 +64,12 @@ namespace DotVVMWebSocketExtension.Tests
 		{
 			var service = new WebSocketManagerService();
 			var socketMock = new Mock<WebSocket>();
-			service.AddSocket(socketMock.Object, testStr);
+			service.AddConnection(socketMock.Object, testStr);
 
-			Assert.Contains(testStr, service.Sockets.Keys);
-			Assert.Contains(socketMock.Object, service.Sockets.Values);
+			Assert.Contains(testStr, service.Connections.Keys);
+			Assert.Contains(socketMock.Object, service.Connections.Values);
 
-			var id = service.GetSocketId(socketMock.Object);
+			var id = service.GetConnectionId(socketMock.Object);
 			Assert.Equal(testStr, id);
 		}
 
@@ -79,9 +79,9 @@ namespace DotVVMWebSocketExtension.Tests
 		{
 			var service = new WebSocketManagerService();
 			var socketMock = new Mock<WebSocket>();
-			service.AddSocket(socketMock.Object, testStr);
+			service.AddConnection(socketMock.Object, testStr);
 
-			var res = service.GetSocketById(testStr);
+			var res = service.GetConnetionById(testStr);
 
 			Assert.Equal(res, socketMock.Object);
 		}
