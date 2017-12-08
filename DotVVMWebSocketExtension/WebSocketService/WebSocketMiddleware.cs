@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
-	public class WebSocketMiddleware 
+	public class WebSocketMiddleware
 	{
 		private readonly RequestDelegate _next;
 		private WebSocketHub Hub { get; }
@@ -28,31 +29,42 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			var socket = await context.WebSockets.AcceptWebSocketAsync();
 
 			await Hub.OnConnected(socket);
-			await ReceiveMessage(socket);
+			await HandleWebSocketCommunication(socket);
 			await _next(context);
 		}
 
-		private async Task ReceiveMessage(WebSocket socket)
+		private async Task HandleWebSocketCommunication(WebSocket socket)
 		{
-			var buffer = new byte[1024 * 4];
-
+			var buffer = new ArraySegment<byte>(new byte[4 * 1024]);
 			while (socket.State == WebSocketState.Open)
 			{
-				var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+				using (var ms = new MemoryStream())
+				{
+					WebSocketReceiveResult result;
+					do
+					{
+						result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+						ms.Write(buffer.Array, buffer.Offset, result.Count);
 
-				await HandleMessage(socket, result, Encoding.UTF8.GetString(buffer).TrimEnd('\0'));
-			}
-		}
+					} while (!result.EndOfMessage);
 
-		private async Task HandleMessage(WebSocket socket, WebSocketReceiveResult result, string message)
-		{
-			if (result.MessageType == WebSocketMessageType.Text)
-			{
-				await Hub.ReceiveMessageAsync(socket, result, message);
-			}
-			else if (result.MessageType == WebSocketMessageType.Close)
-			{
-				await Hub.OnDisconnected(socket);
+					ms.Seek(0, SeekOrigin.Begin);
+
+					if (result.MessageType == WebSocketMessageType.Text)
+					{
+						string messageResult;
+						using (var reader = new StreamReader(ms, Encoding.UTF8))
+						{
+							messageResult = await reader.ReadToEndAsync();
+						}
+						await Hub.ReceiveMessageAsync(socket, result, messageResult);
+					}
+					else if (result.MessageType == WebSocketMessageType.Close)
+					{
+						await Hub.OnDisconnected(socket);
+					}
+
+				}
 			}
 		}
 	}
