@@ -18,7 +18,7 @@ namespace DotVVMWebSocketExtension.Tests
 		private readonly Mock<HttpContext> contextMock;
 		private readonly Mock<DotvvmRequestContext> dotvvmContextMock;
 		private readonly Mock<WebSocketViewModelSerializer> serializer;
-		private readonly Mock<WebSocketHub> hubMock;
+		private readonly Mock<WebSocketFacade> hubMock;
 		private readonly Mock<HttpRequest> requestMock;
 
 		public WebSocketMiddlewareTests()
@@ -26,7 +26,7 @@ namespace DotVVMWebSocketExtension.Tests
 			contextMock = new Mock<HttpContext>();
 			dotvvmContextMock = new Mock<DotvvmRequestContext>();
 			serializer = new Mock<WebSocketViewModelSerializer>(new Mock<IViewModelSerializationMapper>().Object);
-			hubMock = new Mock<WebSocketHub>(new Mock<WebSocketManagerService>().Object, serializer.Object,
+			hubMock = new Mock<WebSocketFacade>(new Mock<WebSocketManagerService>().Object, serializer.Object,
 				dotvvmContextMock.Object);
 			requestMock = new Mock<HttpRequest>();
 			wsm = new Mock<WebSocketManager>();

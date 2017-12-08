@@ -6,13 +6,13 @@ namespace DotvvmApplication1.ViewModels
 {
 	public class ServerEventsViewModel : MasterpageViewModel
 	{
-		public WebSocketHub Hub { get; set; } // TODO NAME OF HUB VARIABLE
+		public WebSocketFacade Hub { get; set; } // TODO NAME OF HUB VARIABLE
 		public string Text { get; set; }
 		public long Percentage { get; set; }
 		public bool IsPercentageVisible { get; set; }
 
 
-		public ServerEventsViewModel(WebSocketHub hub)
+		public ServerEventsViewModel(WebSocketFacade hub)
 		{
 			Hub = hub;
 			Text = "No action";
@@ -37,16 +37,16 @@ namespace DotvvmApplication1.ViewModels
 				token.ThrowIfCancellationRequested();
 //				if (i==50)
 //				{
-//					await Hub.GetViewModelFromClientAsync();
+//					await hub.UpdateViewModelInTaskFromCurrentClientAsync();
 //				}
 
 				Percentage = i;
-				await Hub.UpdateViewModelOnClient();
+				await Hub.UpdateViewModelOnCurrentClientAsync();
 				await Task.Delay(10);
 			}
 			Text = "Task is Complete";
 			IsPercentageVisible = false;
-			await Hub.UpdateViewModelOnClient();
+			await Hub.UpdateViewModelOnCurrentClientAsync();
 		}
 
 		public void StopTask()

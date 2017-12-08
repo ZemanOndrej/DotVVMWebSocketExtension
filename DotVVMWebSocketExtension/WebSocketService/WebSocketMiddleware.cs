@@ -11,12 +11,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 	public class WebSocketMiddleware
 	{
 		private readonly RequestDelegate _next;
-		private WebSocketHub Hub { get; }
+		private WebSocketFacade Facade { get; }
 
-		public WebSocketMiddleware(RequestDelegate next, WebSocketHub hub)
+		public WebSocketMiddleware(RequestDelegate next, WebSocketFacade facade)
 		{
 			_next = next;
-			Hub = hub;
+			Facade = facade;
 		}
 
 		public async Task Invoke(HttpContext context)
@@ -28,7 +28,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 			var socket = await context.WebSockets.AcceptWebSocketAsync();
 
-			await Hub.OnConnected(socket);
+			await Facade.OnConnected(socket);
 			await HandleWebSocketCommunication(socket);
 			await _next(context);
 		}
@@ -57,11 +57,11 @@ namespace DotVVMWebSocketExtension.WebSocketService
 						{
 							messageResult = await reader.ReadToEndAsync();
 						}
-						await Hub.ReceiveMessageAsync(socket, result, messageResult);
+						await Facade.ReceiveMessageAsync(socket, result, messageResult);
 					}
 					else if (result.MessageType == WebSocketMessageType.Close)
 					{
-						await Hub.OnDisconnected(socket);
+						await Facade.OnDisconnected(socket);
 					}
 
 				}

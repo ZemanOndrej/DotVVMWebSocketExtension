@@ -45,7 +45,6 @@ namespace DotvvmApplication1
 			loggerFactory.AddConsole();
 
 			// use DotVVM
-			app.UseWebSockets();
 			app.MapWebSocketService();
 			var dotvvmConfiguration = app.UseDotVVM<DotvvmStartup>(env.ContentRootPath);
 			app.UseStaticFiles();

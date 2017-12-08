@@ -57,7 +57,6 @@ namespace DotVVMWebSocketExtension.Tests
 			socketMock.Verify(s =>
 				s.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed Peacefully", CancellationToken.None));
 			Assert.DoesNotContain(testStr, service.Sockets.Keys);
-			Assert.DoesNotContain(testStr, service.SocketGroups.Values.SelectMany(i => i).Distinct());
 		}
 
 		[Fact]
@@ -87,39 +86,7 @@ namespace DotVVMWebSocketExtension.Tests
 			Assert.Equal(res, socketMock.Object);
 		}
 
-		[Fact]
-		public void AddSocketToGroupTest()
-		{
-			var service = new WebSocketManagerService();
-			var socketMock = new Mock<WebSocket>();
-			service.AddSocket(socketMock.Object, testStr);
-			service.CreateNewGroup(testGroupName);
-
-			var testList = new ConcurrentDictionary<string, HashSet<string>>();
-			testList.TryAdd(testGroupName, new HashSet<string> {testStr});
 
 
-			service.AddSocketToGroup(socketMock.Object, testGroupName);
-
-			service.SocketGroups.TryGetValue(testGroupName, out var list);
-			Assert.Contains(testStr, list);
-			Assert.Equal(testList, service.SocketGroups);
-		}
-
-		[Fact]
-		public void RemoveSocketFromGroupTest()
-		{
-			var service = new WebSocketManagerService();
-			var socketMock = new Mock<WebSocket>();
-			service.AddSocket(socketMock.Object, testStr);
-			service.CreateNewGroup(testGroupName);
-			service.AddSocketToGroup(socketMock.Object, testGroupName);
-
-			service.RemoveSocketFromGroup(socketMock.Object,testGroupName);
-
-			service.SocketGroups.TryGetValue(testGroupName, out var list);
-			Assert.Empty(list);
-
-		}
 	}
 }

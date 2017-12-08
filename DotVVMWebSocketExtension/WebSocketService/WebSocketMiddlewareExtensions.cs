@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
-	public static class WebSocketExtensions
+	public static class WebSocketMiddlewareExtensions
 	{
 
 		/// <summary>
@@ -16,17 +16,19 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		{
 			services.TryAddSingleton<WebSocketManagerService>();
 			services.TryAddSingleton<WebSocketViewModelSerializer>();
-			services.TryAddScoped<WebSocketHub>();
+			services.TryAddScoped<WebSocketFacade>();
 			return services;
 		}
 
 		/// <summary>
+		/// Uses WebSocket Middleware
 		/// Maps url starting with "/ws" for the WebSocket middleware.
 		/// </summary>
 		/// <param name="app">The application.</param>
 		/// <returns></returns>
 		public static IApplicationBuilder MapWebSocketService(this IApplicationBuilder app)
 		{
+			app.UseWebSockets();
 			return app.Map("/ws", a => a.UseMiddleware<WebSocketMiddleware>());
 		}
 	}

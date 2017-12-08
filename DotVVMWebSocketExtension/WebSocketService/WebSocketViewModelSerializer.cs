@@ -7,7 +7,6 @@ using DotVVM.Framework.ViewModel.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using static DotVVM.Framework.Utils.FunctionalExtensions;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
@@ -20,7 +19,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 //		private readonly IViewModelProtector viewModelProtector;
 
 
-		public WebSocketViewModelSerializer(IViewModelSerializationMapper mapper, IViewModelProtector viewModelProtector)
+		public WebSocketViewModelSerializer(IViewModelSerializationMapper mapper)
 		{
 			this.mapper = mapper;
 //			this.viewModelProtector = viewModelProtector;
@@ -88,7 +87,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 					throw;
 				}
 
-//				context.ReceivedViewModelJson["viewModel"] = (JObject) context.ViewModelJson["viewModel"]; //TODO
+				context.ReceivedViewModelJson["viewModel"] = (JObject) context.ViewModelJson["viewModel"]; 
 
 				context.ViewModelJson.Remove("viewModel");
 			}

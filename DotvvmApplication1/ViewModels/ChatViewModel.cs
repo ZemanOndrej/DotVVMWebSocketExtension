@@ -10,7 +10,7 @@ namespace DotvvmApplication1.ViewModels
 {
 	public class ChatViewModel : MasterpageViewModel
 	{
-		public WebSocketHub Hub { get; set; }
+		public WebSocketFacade Hub { get; set; }
 		public ChatFacade ChatFacade { get; set; }
 
 		public List<ChatMessageDto> Messages { get; set; }
@@ -23,7 +23,7 @@ namespace DotvvmApplication1.ViewModels
 		public bool IsLoggedIn { get; set; }
 
 
-		public ChatViewModel(WebSocketHub hub, ChatFacade facade)
+		public ChatViewModel(WebSocketFacade wsHub, ChatFacade facade)
 		{
 			ChatFacade = facade;
 			CurrentUser = new UserDto();
@@ -31,14 +31,14 @@ namespace DotvvmApplication1.ViewModels
 			Messages = new List<ChatMessageDto>();
 			CurrentRoom = new ChatRoomDto();
 
-			Hub = hub;
+			Hub = wsHub;
 		}
 
 		public void LogIn()
 		{
 			if (string.IsNullOrEmpty(CurrentUser.Name) || string.IsNullOrEmpty(Hub.CurrentSocketId)) return;
 			CurrentUser.SocketId = Hub.CurrentSocketId;
-			ChatRooms= ChatFacade.GetAllChatRooms();
+			ChatRooms = ChatFacade.GetAllChatRooms();
 			CurrentUser.Id = ChatFacade.CreateUser(CurrentUser);
 			IsLoggedIn = true;
 		}
@@ -54,12 +54,16 @@ namespace DotvvmApplication1.ViewModels
 					Message = NewMessage,
 					Time = DateTime.Now
 				};
-				//				await Hub.UpdateViewModelOnClient();
+				//				await hub.UpdateViewModelOnCurrentClientAsync();
 				msg.Id = ChatFacade.SendMessageToChatRoom(msg);
 				Messages.Add(msg);
-//				await Hub.UpdateViewModelOnClient();
+//				if (Messages.Count > 2)
+//				{
+//					Messages.RemoveAt(0);
+//				}
+//				await hub.UpdateViewModelOnCurrentClientAsync();
 
-				await Hub.SyncViewModelForSockets(
+				await Hub.SyncViewModelForSocketsAsync(
 					ChatFacade.GetAllUsersFromChatRoom(CurrentRoom.Id)
 						.Select(s => s.SocketId)
 						.ToList());
@@ -74,11 +78,11 @@ namespace DotvvmApplication1.ViewModels
 		{
 			if (string.IsNullOrEmpty(NewRoomName)) return;
 
-			var newChatRoom = new ChatRoomDto{Name = NewRoomName};
-			newChatRoom.Id =ChatFacade.CreateChatRoom(newChatRoom);
+			var newChatRoom = new ChatRoomDto {Name = NewRoomName};
+			newChatRoom.Id = ChatFacade.CreateChatRoom(newChatRoom);
 
 			ChatRooms.Add(newChatRoom);
-			await Hub.SyncViewModelForSockets(
+			await Hub.SyncViewModelForSocketsAsync(
 				ChatFacade.GetAllConnectedUsers()
 					.Select(s => s.SocketId)
 					.ToList());

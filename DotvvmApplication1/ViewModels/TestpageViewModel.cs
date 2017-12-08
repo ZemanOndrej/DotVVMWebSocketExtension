@@ -7,9 +7,9 @@ namespace DotvvmApplication1.ViewModels
     {
 	    public string Text { get; set; }
 
-		public WebSocketHub Hub { get; set; }
+		public WebSocketFacade Hub { get; set; }
 
-	    public TestpageViewModel(WebSocketHub hub)
+	    public TestpageViewModel(WebSocketFacade hub)
 	    {
 		    Hub = hub;
 	    }
@@ -17,7 +17,7 @@ namespace DotvvmApplication1.ViewModels
 	    public void Start()
 	    {
 		    Console.WriteLine(Context.HttpContext.Request);
-		    var viewModelFromClientAsync = Hub.GetViewModelFromClientAsync();
+		    var viewModelFromClientAsync = Hub.UpdateViewModelInTaskFromCurrentClientAsync();
 	    }
 	}
 }

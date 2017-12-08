@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
-	public class WebSocketHub
+	public class WebSocketFacade
 	{
 		#region PropertiesAndConstructor
 
@@ -21,7 +21,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public string CurrentSocketId { get; set; }
 		public string CurrentTaskId { get; set; }
 
-		public WebSocketHub(WebSocketManagerService webSocketService, WebSocketViewModelSerializer serializer,
+		public WebSocketFacade(WebSocketManagerService webSocketService, WebSocketViewModelSerializer serializer,
 			IDotvvmRequestContext context)
 		{
 			WebSocketService = webSocketService;
@@ -33,7 +33,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#region Connect/Disconnect
 
-		public virtual async Task OnConnected(WebSocket socket)
+		public async Task OnConnected(WebSocket socket)
 		{
 			WebSocketService.AddSocket(socket);
 			CurrentSocketId = WebSocketService.GetSocketId(socket);
@@ -41,7 +41,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 				JsonConvert.SerializeObject(new {socketId = CurrentSocketId, action = "webSocketInit"}, Formatting.None));
 		}
 
-		public virtual async Task OnDisconnected(WebSocket socket)
+		public async Task OnDisconnected(WebSocket socket)
 		{
 			WebSocketService.StopAllTasksForSocket(socket);
 
@@ -50,7 +50,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#endregion
 
-		public virtual async Task ReceiveMessageAsync(WebSocket socket, WebSocketReceiveResult result, string message)
+		public async Task ReceiveMessageAsync(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
 			Console.WriteLine(WebSocketService.TaskList.Count);
 			var o = JsonConvert.DeserializeObject(message);
@@ -58,8 +58,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 			await SendMessageToSocketAsync(socket,
 				JsonConvert.SerializeObject(
-					new
-					{
+					new{
 						action = "pong",
 						message = $"Your Message was recieved, socketid&{WebSocketService.GetSocketId(socket)}, message: &{message}"
 					}, Formatting.None)
@@ -69,7 +68,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#region Send/Update ViewModel
 
-		public async Task SendMessageToSocketAsync(WebSocket socket, string message)
+		protected async Task SendMessageToSocketAsync(WebSocket socket, string message)
 		{
 			if (socket?.State == WebSocketState.Open)
 			{
@@ -78,14 +77,14 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
-		public async Task SendMessageToSocketAsync(string socketId, string message) =>
+		protected async Task SendMessageToSocketAsync(string socketId, string message) =>
 			await SendMessageToSocketAsync(WebSocketService.GetSocketById(socketId), message);
 
 
-		public async Task SendMessageToClientAsync(string message) =>
+		protected async Task SendMessageToClientAsync(string message) =>
 			await SendMessageToSocketAsync(WebSocketService.GetSocketById(CurrentSocketId), message);
 
-		public async Task SendMessageToAllAsync(string message)
+		protected async Task SendMessageToAllAsync(string message)
 		{
 			foreach (var pair in WebSocketService.Sockets)
 			{
@@ -97,7 +96,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 
 
-		public async Task UpdateViewModelOnClient()
+		public async Task UpdateViewModelOnCurrentClientAsync()
 		{
 			if (Context != null)
 			{
@@ -117,7 +116,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
-		public async Task SyncViewModelForSockets(List<string> socketIdList)
+		public async Task SyncViewModelForSocketsAsync(List<string> socketIdList)
 		{
 			foreach (var socketId in socketIdList)
 			{
@@ -164,7 +163,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#endregion
 
-		public async Task GetViewModelFromClientAsync()
+		public async Task UpdateViewModelInTaskFromCurrentClientAsync()
 		{
 			await SendMessageToSocketAsync(CurrentSocketId,
 				JsonConvert.SerializeObject(new {action = "viewModelSynchronizationRequest",taskId=CurrentTaskId}, Formatting.None));
