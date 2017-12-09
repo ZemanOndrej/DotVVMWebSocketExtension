@@ -14,5 +14,18 @@ namespace DAL
 		{
 		}
 
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<ChatRoom>()
+				.HasMany(e => e.UserList)
+				.WithOne(e => e.CurrentChatRoom);
+			modelBuilder.Entity<ChatRoom>()
+				.HasMany(e => e.ChatMessages)
+				.WithOne(e => e.ChatRoom);
+			modelBuilder.Entity<ChatMessage>()
+				.HasOne(e => e.User)
+				.WithMany(e => e.Messages);
+
+		}
 	}
 }

@@ -14,7 +14,6 @@ namespace BL.Facades
 
 		public ChatFacade(ChatDbContext ctx) => Context = ctx;
 
-
 		public int CreateUser(UserDto user)
 		{
 			var nuser = Mapping.Mapper.Map<User>(user);
@@ -38,14 +37,13 @@ namespace BL.Facades
 
 		public void AddUserToChatRoom(int roomId, UserDto user)
 		{
-			var users = Context.Users.ToList();
-			var usr = Context.Users.FirstOrDefault(u => u.Id == user.Id);
-
-			
-			var group = Context.ChatRooms.Include(s=>s.UserList).FirstOrDefault(g=>g.Id==roomId);
-			if (!group.UserList.Contains(usr))
+			var usr = Context.Users.Include(u=>u.CurrentChatRoom).FirstOrDefault(u => u.Id == user.Id);
+			var room = Context.ChatRooms.Include(s=>s.UserList).FirstOrDefault(g=>g.Id==roomId);
+			usr.CurrentChatRoom?.UserList.Remove(usr);
+			usr.CurrentChatRoom = room;
+			if (!room.UserList.Contains(usr))
 			{
-				group.UserList.Add(usr);
+				room.UserList.Add(usr);
 			}
 			Context.SaveChanges();
 		}
@@ -69,8 +67,7 @@ namespace BL.Facades
 			return Mapping.Mapper.Map<List<ChatMessageDto>>(msgs);
 		}
 
-
-		public int SendMessageToChatRoom(ChatMessageDto messageDto)
+		public int SendMessageToChatRoom(UserDto user,ChatMessageDto messageDto)
 		{
 			var message = Mapping.Mapper.Map<ChatMessage>(messageDto);
 
@@ -78,8 +75,12 @@ namespace BL.Facades
 			message.User = Context.Users.FirstOrDefault(u => u.Id == message.User.Id);
 			Context.ChatMessages.Add(message);
 			Context.SaveChanges();
-
 			return message.Id;
+		}
+
+		public ChatMessageDto GetChatMessageById(int id)
+		{
+			return Mapping.Mapper.Map<ChatMessageDto>(Context.ChatMessages.Find(id));
 		}
 	}
 }

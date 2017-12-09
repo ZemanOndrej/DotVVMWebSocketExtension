@@ -3,8 +3,10 @@
 
 <dot:Content ContentPlaceHolderID="MainContent">
 
-	SocketId<{{value: Hub.CurrentSocketId}}>
+	SocketId<{{value: Hub.ConnectionId}}>
 
+	<div>UserName:{{value: CurrentUser.Name}}</div>
+	<div>Room:{{value: CurrentRoom.Name}}</div>
 	<div class="{value: IsLoggedIn ? 'hidden':'nothidden'}">
 		<dot:TextBox Text="{value: CurrentUser.Name}" placeholder="Enter your name" />
 		<dot:Button Click="{command: LogIn()}"> LogIn</dot:Button>
@@ -42,7 +44,7 @@
 				<ItemTemplate>
 					<div>
 						<span>{{value: Time}}</span>
-						<span>{{value: User.Name}}</span>:
+						<span>{{value: UserName}}</span>:
 						<span> {{value: Message}}</span>
 					</div>
 				</ItemTemplate>

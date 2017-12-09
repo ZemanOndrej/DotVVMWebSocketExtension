@@ -13,7 +13,7 @@
 
 
 	SocketId
-	<{{value: Hub.CurrentSocketId}}>
+	<{{value: Hub.ConnectionId}}>
 	<dot:Button Click="{command: StopTask()}">stop</dot:Button>
 
 	<dot:RequiredResource Name="websocketScript" />

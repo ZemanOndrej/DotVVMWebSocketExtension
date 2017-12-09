@@ -8,7 +8,7 @@ namespace DAL.Entities
 		public int Id { get; set; }
 
 		[Required]
-		public virtual List<ChatMessage> ChatMessages { get; set; }
+		public List<ChatMessage> ChatMessages { get; set; }
 
 		public List<User> UserList { get; set; }
 

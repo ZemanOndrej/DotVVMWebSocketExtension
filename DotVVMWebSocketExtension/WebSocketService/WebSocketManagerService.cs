@@ -32,7 +32,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#endregion
 
-		#region SocketManagement
+		#region ConnectionManagement
 
 		/// <summary>
 		/// Returns WebSocket Object with ID
@@ -51,6 +51,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <param name="socket">The socket.</param>
 		/// <returns></returns>
 		public string GetConnectionId(WebSocket socket) => Connections.FirstOrDefault(p => p.Value.Socket == socket).Key;
+
 		public string GetConnectionId(Connection connection) => GetConnectionId(connection.Socket);
 
 		/// <summary>
@@ -63,16 +64,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			var guid = Guid.NewGuid().ToString();
 
 			return AddConnection(connection, guid);
-		}
-
-
-		public string AddContext(IDotvvmRequestContext context, string id)
-		{
-			if (!string.IsNullOrEmpty(id))
-			{
-				return Connections.TryAdd(id, new Connection(context)) ? id : null;
-			}
-			return null;
 		}
 
 		/// <summary>
@@ -88,11 +79,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 				return Connections.TryAdd(id, connection) ? id : null;
 			}
 			return null;
-		}
-
-		public void AddSocketToConnection(string connectionId, WebSocket socket)
-		{
-			GetConnetionById(connectionId).Socket=socket;
 		}
 
 		/// <summary>
@@ -113,6 +99,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <param name="socket">The socket.</param>
 		/// <returns></returns>
 		public void RemoveConnection(WebSocket socket) => RemoveConnection(GetConnectionId(socket));
+
 		public void RemoveConnection(Connection connection) => RemoveConnection(GetConnectionId(connection));
 
 		#endregion
@@ -125,7 +112,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <param name="connectionId">The socket identifier.</param>
 		/// <param name="task">The task.</param>
 		/// <param name="token">The token.</param>
-		/// <param name="context">Context of HTTP request</param>
+		/// <param name="context">LastSentViewModelJson of HTTP request</param>
 		public string AddTask(Task task, string connectionId, CancellationTokenSource token, IDotvvmRequestContext context)
 		{
 			var taskId = Guid.NewGuid().ToString();
@@ -170,7 +157,5 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public void StopAllTasksForSocket(WebSocket socket) => StopAllTasksForSocket(GetConnectionId(socket));
 
 		#endregion
-
-
 	}
 }

@@ -36,8 +36,8 @@ namespace DotvvmApplication1.ViewModels
 
 		public void LogIn()
 		{
-			if (string.IsNullOrEmpty(CurrentUser.Name) || string.IsNullOrEmpty(Hub.CurrentSocketId)) return;
-			CurrentUser.SocketId = Hub.CurrentSocketId;
+			if (string.IsNullOrEmpty(CurrentUser.Name) || string.IsNullOrEmpty(Hub.ConnectionId)) return;
+			CurrentUser.SocketId = Hub.ConnectionId;
 			ChatRooms = ChatFacade.GetAllChatRooms();
 			CurrentUser.Id = ChatFacade.CreateUser(CurrentUser);
 			IsLoggedIn = true;
@@ -49,14 +49,15 @@ namespace DotvvmApplication1.ViewModels
 			{
 				var msg = new ChatMessageDto
 				{
-					User = CurrentUser,
+					UserId = CurrentUser.Id,
 					ChatRoomId = CurrentRoom.Id,
 					Message = NewMessage,
 					Time = DateTime.Now
 				};
 				//				await hub.UpdateViewModelOnCurrentClientAsync();
-				msg.Id = ChatFacade.SendMessageToChatRoom(msg);
-				Messages.Add(msg);
+				;
+
+				Messages.Add(ChatFacade.GetChatMessageById(ChatFacade.SendMessageToChatRoom(CurrentUser, msg)));
 //				if (Messages.Count > 2)
 //				{
 //					Messages.RemoveAt(0);
@@ -96,6 +97,13 @@ namespace DotvvmApplication1.ViewModels
 			CurrentRoom.Id = id;
 			Messages = ChatFacade.GetAllMessagesFromRoom(id);
 			IsInRoom = true;
+		}
+
+		public override Task PreRender()
+		{
+			Console.WriteLine(Hub.ConnectionId);
+			Hub.SaveContext();
+			return base.PreRender();
 		}
 	}
 }

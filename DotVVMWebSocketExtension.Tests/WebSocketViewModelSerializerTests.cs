@@ -57,7 +57,7 @@ namespace DotVVMWebSocketExtension.Tests
     ""Hub"": {
       ""$type"": ""9wRAK8ilQaKKVYvD6JG40TIN4gU="",
       ""CurrentGroupId"": null,
-      ""CurrentSocketId"": ""c6e8a12f-845e-4df7-8aad-1746ba1c0f99""
+      ""ConnectionId"": ""c6e8a12f-845e-4df7-8aad-1746ba1c0f99""
     },
     ""Kappucino"": ""Random String"",
     ""Text"": ""Stage 2"",
@@ -85,7 +85,7 @@ namespace DotVVMWebSocketExtension.Tests
     ""Hub"": {
       ""$type"": ""9wRAK8ilQaKKVYvD6JG40TIN4gU="",
       ""CurrentGroupId"": null,
-      ""CurrentSocketId"": ""c6e8a12f-845e-4df7-8aad-1746ba1c0f99""
+      ""ConnectionId"": ""c6e8a12f-845e-4df7-8aad-1746ba1c0f99""
     },
     ""Kappucino"": ""Random String"",
     ""Text"": ""Stage 3"",

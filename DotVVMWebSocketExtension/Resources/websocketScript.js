@@ -1,8 +1,6 @@
 ﻿var initWs = function() {
 	var viewModelName = "root";
-	console.log(dotvvm.viewModels[viewModelName].viewModel.Hub());
-	var socketId = dotvvm.viewModels[viewModelName].viewModel.Hub().CurrentSocketId();
-	var uri = "ws://" + window.location.host + "/ws?connectionId="+socketId;
+	var uri = "ws://" + window.location.host + "/ws";
 	var wsCount = 0;
 
 
@@ -25,7 +23,7 @@
 			switch (resultObject.action) {
 			case "webSocketInit":
 				console.log(resultObject.type);
-				dotvvm.viewModelObservables[viewModelName]().Hub().CurrentSocketId(resultObject.socketId);
+				dotvvm.viewModelObservables[viewModelName]().Hub().ConnectionId(resultObject.socketId);
 				break;
 			case "successfulCommand":
 				updateViewModel(resultObject);

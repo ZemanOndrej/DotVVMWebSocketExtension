@@ -9,7 +9,8 @@ namespace BL.DTO
 		[Required]
 		public string Message { get; set; }
 		[Required]
-		public UserDto User { get; set; }
+		public int UserId { get; set; }
+		public string UserName { get; set; }
 		[Required]
 		public int ChatRoomId { get; set; }
 

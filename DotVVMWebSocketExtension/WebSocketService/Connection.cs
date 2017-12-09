@@ -1,21 +1,15 @@
 ﻿using System;
 using System.Net.WebSockets;
 using System.Threading;
-using DotVVM.Framework.Hosting;
+using Newtonsoft.Json.Linq;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
 	public class Connection : IDisposable
 	{
-		public IDotvvmRequestContext Context { get; set; }
+		public JObject LastSentViewModelJson { get; set; }
 		public WebSocket Socket { get; set; }
 		public bool IsConnected => Socket?.State == WebSocketState.Open;
-
-		public Connection(IDotvvmRequestContext context)
-		{
-			Context = context;
-		}
-
 
 		protected bool Equals(Connection other)
 		{

@@ -28,7 +28,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 			var socket = await context.WebSockets.AcceptWebSocketAsync();
 
-			Facade.OnConnected(socket,context.Request.Query["connectionId"].ToString());
+			await Facade.OnConnected(socket);
 			await HandleWebSocketCommunication(socket);
 			await _next(context);
 		}
