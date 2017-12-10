@@ -18,7 +18,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public ConcurrentDictionary<string, Connection> Connections { get; }
 
-
 		public ConcurrentDictionary<string, HashSet<WebSocketTask>> TaskList { get; }
 
 		/// <summary>

@@ -89,7 +89,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		protected async Task SendMessageToSocketAsync(string socketId, string message) =>
 			await SendMessageToSocketAsync(WebSocketService.GetConnetionById(socketId).Socket, message);
 
-
 		protected async Task SendMessageToClientAsync(string message) =>
 			await SendMessageToSocketAsync(WebSocketService.GetConnetionById(ConnectionId).Socket, message);
 
@@ -102,53 +101,25 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		}
 
 
-		public async Task UpdateViewModelOnCurrentClientAsync()
-		{
-			if (Context != null)
-			{
-				Serializer.BuildViewModel(Context);
-				var serializedString = Serializer.SerializeViewModel(Context, WebSocketService.GetConnetionById(ConnectionId));
-				try
-				{
-					await SendMessageToClientAsync(serializedString);
-				}
-				catch (WebSocketException e)
-				{
-					var connection = WebSocketService.GetConnetionById(ConnectionId);
-					connection.Dispose(WebSocketCloseStatus.InternalServerError, "server error");
-					OnDisconnected(connection);
-					Console.WriteLine(e);
-				}
-			}
-		}
-
-		public async Task SyncViewModelForSocketsAsync(List<string> socketIdList)
-		{
-			var currentConnection = WebSocketService.GetConnetionById(ConnectionId);
-
-			foreach (var socketId in socketIdList)
-			{
-				if (Context == null) continue;
-				Serializer.BuildViewModel(Context);
-				var connetionById = WebSocketService.GetConnetionById(socketId);
-				if (connetionById == null) continue;
-				var serializedString = Serializer.SerializeViewModel(Context, connetionById);
-
-				try
-				{
-					if (ConnectionId != socketId)
-					{
-						await SendMessageToSocketAsync(socketId, serializedString);
-					}
-				}
-				catch (WebSocketException e)
-				{
-					OnDisconnected(currentConnection, WebSocketCloseStatus.InternalServerError, "server error");
-					Console.WriteLine(e);
-				}
-			}
-//			currentConnection.LastSentViewModelJson.ViewModelJson = LastSentViewModelJson.ViewModelJson;
-		}
+//		public async Task UpdateViewModelOnCurrentClientAsync()
+//		{
+//			if (Context != null)
+//			{
+//				Serializer.BuildViewModel(Context);
+//				var serializedString = Serializer.SerializeViewModel(Context, WebSocketService.GetConnetionById(ConnectionId));
+//				try
+//				{
+//					await SendMessageToClientAsync(serializedString);
+//				}
+//				catch (WebSocketException e)
+//				{
+//					var connection = WebSocketService.GetConnetionById(ConnectionId);
+//					connection.Dispose(WebSocketCloseStatus.InternalServerError, "server error");
+//					OnDisconnected(connection);
+//					Console.WriteLine(e);
+//				}
+//			}
+//		}
 
 		#endregion
 
@@ -170,6 +141,31 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#endregion
 
+
+		public async Task ChangeViewModelForSockets<T>(Action<T> action, List<string> socketIdList)
+		{
+			foreach (var socketId in socketIdList)
+			{
+				if (ConnectionId == socketId) continue;
+				var connection = WebSocketService.GetConnetionById(socketId);
+
+				action.Invoke((T) connection.LastSentViewModel);
+				Serializer.BuildViewModel(connection);
+
+				var serializedString = Serializer.SerializeViewModel(connection);
+
+				try
+				{
+					await SendMessageToSocketAsync(socketId, serializedString);
+				}
+				catch (WebSocketException e)
+				{
+					OnDisconnected(connection, WebSocketCloseStatus.InternalServerError, "server error");
+					Console.WriteLine(e);
+				}
+			}
+		}
+
 		public async Task UpdateViewModelInTaskFromCurrentClientAsync()
 		{
 			await SendMessageToSocketAsync(ConnectionId,
@@ -179,8 +175,11 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public void SaveContext()
 		{
 			if (ConnectionId == null) return;
+
+			var connection = WebSocketService.GetConnetionById(ConnectionId);
 			Serializer.BuildViewModel(Context);
-			WebSocketService.GetConnetionById(ConnectionId).LastSentViewModelJson = Context.ViewModelJson;
+			connection.LastSentViewModelJson = Context.ViewModelJson;
+			connection.LastSentViewModel = Context.ViewModel;
 		}
 	}
 }

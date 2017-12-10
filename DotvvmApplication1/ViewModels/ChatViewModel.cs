@@ -54,40 +54,37 @@ namespace DotvvmApplication1.ViewModels
 					Message = NewMessage,
 					Time = DateTime.Now
 				};
-				//				await hub.UpdateViewModelOnCurrentClientAsync();
-				;
-
-				Messages.Add(ChatFacade.GetChatMessageById(ChatFacade.SendMessageToChatRoom(CurrentUser, msg)));
-//				if (Messages.Count > 2)
-//				{
-//					Messages.RemoveAt(0);
-//				}
-//				await hub.UpdateViewModelOnCurrentClientAsync();
-
-				await Hub.SyncViewModelForSocketsAsync(
-					ChatFacade.GetAllUsersFromChatRoom(CurrentRoom.Id)
-						.Select(s => s.SocketId)
-						.ToList());
+				ChatFacade.GetChatMessageById(ChatFacade.SendMessageToChatRoom(CurrentUser, msg));
+				Messages.Add(msg);
 				NewMessage = "";
 
-//				Context.InterruptRequest();//todo
-//				ChatFacade.GetAllUsersFromChatRoom(1);
+				await Hub.ChangeViewModelForSockets((ChatViewModel viewModel) =>
+				{
+					viewModel.Messages.Add(msg);
+				}, ChatFacade
+					.GetAllUsersFromChatRoom(CurrentRoom.Id)
+					.Select(s => s.SocketId)
+					.ToList());
 			}
 		}
 
 		public async Task CreateRoom()
 		{
 			if (string.IsNullOrEmpty(NewRoomName)) return;
-
-			var newChatRoom = new ChatRoomDto {Name = NewRoomName};
+			var newChatRoom = new ChatRoomDto
+			{
+				Name = NewRoomName
+			};
 			newChatRoom.Id = ChatFacade.CreateChatRoom(newChatRoom);
-
 			ChatRooms.Add(newChatRoom);
-			await Hub.SyncViewModelForSocketsAsync(
-				ChatFacade.GetAllConnectedUsers()
-					.Select(s => s.SocketId)
-					.ToList());
 			NewRoomName = "";
+
+			await Hub.ChangeViewModelForSockets((ChatViewModel viewModel) =>
+			{
+				viewModel.ChatRooms.Add(newChatRoom);
+			}, ChatFacade.GetAllConnectedUsers()
+				.Select(s => s.SocketId)
+				.ToList());
 		}
 
 		public void JoinRoom(int id)
@@ -101,7 +98,6 @@ namespace DotvvmApplication1.ViewModels
 
 		public override Task PreRender()
 		{
-			Console.WriteLine(Hub.ConnectionId);
 			Hub.SaveContext();
 			return base.PreRender();
 		}
