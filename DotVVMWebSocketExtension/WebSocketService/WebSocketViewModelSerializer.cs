@@ -27,34 +27,34 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			JsonFormatting = Formatting.None;
 		}
 
-		public void BuildViewModel(Connection connection)
-		{
-			var jsonSerializer = CreateJsonSerializer();
-			var viewModelConverter = new ViewModelJsonConverter(true, mapper)
-			{
-				UsedSerializationMaps = new HashSet<ViewModelSerializationMap>()
-			};
-			jsonSerializer.Converters.Add(viewModelConverter);
-			var writer = new JTokenWriter();
-			try
-			{
-				jsonSerializer.Serialize(writer, connection.LastSentViewModel);
-			}
-			catch (Exception ex)
-			{
-				throw new Exception(
-					$"Could not serialize viewModel of type {connection.LastSentViewModel.GetType().Name}. Serialization failed at property {writer.Path}.",
-					ex);
-			}
-
-//			writer.Token["$csrfToken"] = context.CsrfToken;
-
-
-			var result = new JObject();
-			result["viewModel"] = writer.Token;
-			result["action"] = "successfulCommand";
-			connection.ChangedViewModelJson = result;
-		}
+//		public void BuildViewModel(Connection connection)
+//		{
+//			var jsonSerializer = CreateJsonSerializer();
+//			var viewModelConverter = new ViewModelJsonConverter(true, mapper)
+//			{
+//				UsedSerializationMaps = new HashSet<ViewModelSerializationMap>()
+//			};
+//			jsonSerializer.Converters.Add(viewModelConverter);
+//			var writer = new JTokenWriter();
+//			try
+//			{
+//				jsonSerializer.Serialize(writer, connection.LastSentViewModel);
+//			}
+//			catch (Exception ex)
+//			{
+//				throw new Exception(
+//					$"Could not serialize viewModel of type {connection.LastSentViewModel.GetType().Name}. Serialization failed at property {writer.Path}.",
+//					ex);
+//			}
+//
+////			writer.Token["$csrfToken"] = context.CsrfToken;
+//
+//
+//			var result = new JObject();
+//			result["viewModel"] = writer.Token;
+//			result["action"] = "successfulCommand";
+//			connection.ChangedViewModelJson = result;
+//		}
 
 		public void BuildViewModel(IDotvvmRequestContext context)
 		{
@@ -75,8 +75,10 @@ namespace DotVVMWebSocketExtension.WebSocketService
 					$"Could not serialize viewModel of type {context.ViewModel.GetType().Name}. Serialization failed at property {writer.Path}.",
 					ex);
 			}
-
-//			writer.Token["$csrfToken"] = context.CsrfToken;
+			if (context.CsrfToken != null)
+			{
+				writer.Token["$csrfToken"] = context.CsrfToken;
+			}
 
 			var result = new JObject();
 			result["viewModel"] = writer.Token;
@@ -99,23 +101,23 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		}
 
 
-		public string SerializeViewModel(Connection connection)
-		{
-			if (connection.LastSentViewModelJson != null && connection.ChangedViewModelJson["viewModel"] != null)
-			{
-				connection.ChangedViewModelJson?.Remove("viewModelDiff");
-
-				connection.ChangedViewModelJson["viewModelDiff"] = JsonUtils.Diff(
-					(JObject) connection.LastSentViewModelJson["viewModel"],
-					(JObject) connection.ChangedViewModelJson["viewModel"], true);
-
-
-				connection.LastSentViewModelJson["viewModel"] = (JObject) connection.ChangedViewModelJson["viewModel"].DeepClone();
-
-				connection.ChangedViewModelJson.Remove("viewModel");
-			}
-			return connection.ChangedViewModelJson.ToString(JsonFormatting);
-		}
+//		public string SerializeViewModel(Connection connection)
+//		{
+//			if (connection.LastSentViewModelJson != null && connection.ChangedViewModelJson["viewModel"] != null)
+//			{
+//				connection.ChangedViewModelJson?.Remove("viewModelDiff");
+//
+//				connection.ChangedViewModelJson["viewModelDiff"] = JsonUtils.Diff(
+//					(JObject) connection.LastSentViewModelJson["viewModel"],
+//					(JObject) connection.ChangedViewModelJson["viewModel"], true);
+//
+//
+//				connection.LastSentViewModelJson["viewModel"] = (JObject) connection.ChangedViewModelJson["viewModel"].DeepClone();
+//
+//				connection.ChangedViewModelJson.Remove("viewModel");
+//			}
+//			return connection.ChangedViewModelJson.ToString(JsonFormatting);
+//		}
 
 		public string SerializeViewModel(IDotvvmRequestContext context)
 		{
@@ -123,10 +125,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			{
 				context.ViewModelJson["viewModelDiff"] = JsonUtils.Diff((JObject) context.ReceivedViewModelJson["viewModel"],
 					(JObject) context.ViewModelJson["viewModel"], true);
+
+				context.ReceivedViewModelJson = (JObject) context.ViewModelJson.DeepClone();
+
 				context.ViewModelJson.Remove("viewModel");
 			}
 			return context.ViewModelJson.ToString(JsonFormatting);
 		}
-
 	}
 }

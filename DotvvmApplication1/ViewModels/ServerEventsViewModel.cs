@@ -25,28 +25,29 @@ namespace DotvvmApplication1.ViewModels
 			Percentage = 0;
 			Text = "Action is starting";
 			Hub.CreateAndRunTask(LongTaskAsync);
+
 		}
 
 		public async Task LongTaskAsync( CancellationToken token)
 		{
 			
-//			for (int i = 1; i < 101; ++i)
-//			{
-//				await Task.Delay(10);
-//
-//				token.ThrowIfCancellationRequested();
-////				if (i==50)
-////				{
-////					await hub.UpdateViewModelInTaskFromCurrentClientAsync();
-////				}
-//
-//				Percentage = i;
-//				await Hub.UpdateViewModelOnCurrentClientAsync();
-//				await Task.Delay(10);
-//			}
-//			Text = "Task is Complete";
-//			IsPercentageVisible = false;
-//			await Hub.UpdateViewModelOnCurrentClientAsync();
+			for (int i = 1; i < 101; ++i)
+			{
+				await Task.Delay(10);
+
+				token.ThrowIfCancellationRequested();
+//				if (i==50)
+//				{
+//					await hub.UpdateViewModelInTaskFromCurrentClientAsync();
+//				}
+
+				Percentage = i;
+				await Hub.UpdateViewModelOnCurrentClientAsync();
+				await Task.Delay(10);
+			}
+			Text = "Task is Complete";
+			IsPercentageVisible = false;
+			await Hub.UpdateViewModelOnCurrentClientAsync();
 		}
 
 		public void StopTask()

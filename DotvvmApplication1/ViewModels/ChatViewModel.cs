@@ -52,13 +52,14 @@ namespace DotvvmApplication1.ViewModels
 					UserId = CurrentUser.Id,
 					ChatRoomId = CurrentRoom.Id,
 					Message = NewMessage,
-					Time = DateTime.Now
+					Time = DateTime.Now,
+					UserName = CurrentUser.Name
 				};
 				ChatFacade.GetChatMessageById(ChatFacade.SendMessageToChatRoom(CurrentUser, msg));
 				Messages.Add(msg);
 				NewMessage = "";
 
-				await Hub.ChangeViewModelForSockets((ChatViewModel viewModel) =>
+				await Hub.ChangeViewModelForSocketsAsync((ChatViewModel viewModel) =>
 				{
 					viewModel.Messages.Add(msg);
 				}, ChatFacade
@@ -79,7 +80,7 @@ namespace DotvvmApplication1.ViewModels
 			ChatRooms.Add(newChatRoom);
 			NewRoomName = "";
 
-			await Hub.ChangeViewModelForSockets((ChatViewModel viewModel) =>
+			await Hub.ChangeViewModelForSocketsAsync((ChatViewModel viewModel) =>
 			{
 				viewModel.ChatRooms.Add(newChatRoom);
 			}, ChatFacade.GetAllConnectedUsers()

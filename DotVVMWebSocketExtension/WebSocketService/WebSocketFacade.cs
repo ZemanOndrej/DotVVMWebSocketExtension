@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
@@ -101,25 +102,26 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		}
 
 
-//		public async Task UpdateViewModelOnCurrentClientAsync()
-//		{
-//			if (Context != null)
-//			{
-//				Serializer.BuildViewModel(Context);
-//				var serializedString = Serializer.SerializeViewModel(Context, WebSocketService.GetConnetionById(ConnectionId));
-//				try
-//				{
-//					await SendMessageToClientAsync(serializedString);
-//				}
-//				catch (WebSocketException e)
-//				{
-//					var connection = WebSocketService.GetConnetionById(ConnectionId);
-//					connection.Dispose(WebSocketCloseStatus.InternalServerError, "server error");
-//					OnDisconnected(connection);
-//					Console.WriteLine(e);
-//				}
-//			}
-//		}
+		public async Task UpdateViewModelOnCurrentClientAsync()
+		{
+			var connection = WebSocketService.GetConnetionById(ConnectionId);
+
+			Serializer.BuildViewModel(Context);
+//			connection.LastSentViewModelJson = (JObject) Context.ViewModelJson.DeepClone();
+//			connection.LastSentViewModel = Context.ViewModel;
+			connection.Context = Context;
+			var serializedString = Serializer.SerializeViewModel(Context);
+			try
+			{
+				await SendMessageToClientAsync(serializedString);
+			}
+			catch (WebSocketException e)
+			{
+				connection.Dispose(WebSocketCloseStatus.InternalServerError, "server error");
+				OnDisconnected(connection);
+				Console.WriteLine(e);
+			}
+		}
 
 		#endregion
 
@@ -142,17 +144,17 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		#endregion
 
 
-		public async Task ChangeViewModelForSockets<T>(Action<T> action, List<string> socketIdList)
+		public async Task ChangeViewModelForSocketsAsync<T>(Action<T> action, List<string> socketIdList)
 		{
 			foreach (var socketId in socketIdList)
 			{
 				if (ConnectionId == socketId) continue;
 				var connection = WebSocketService.GetConnetionById(socketId);
+				if (connection == null) continue;
+				action.Invoke((T) connection.Context.ViewModel);
+				Serializer.BuildViewModel(connection.Context);
 
-				action.Invoke((T) connection.LastSentViewModel);
-				Serializer.BuildViewModel(connection);
-
-				var serializedString = Serializer.SerializeViewModel(connection);
+				var serializedString = Serializer.SerializeViewModel(connection.Context);
 
 				try
 				{
@@ -166,6 +168,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
+
 		public async Task UpdateViewModelInTaskFromCurrentClientAsync()
 		{
 			await SendMessageToSocketAsync(ConnectionId,
@@ -178,8 +181,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 			var connection = WebSocketService.GetConnetionById(ConnectionId);
 			Serializer.BuildViewModel(Context);
-			connection.LastSentViewModelJson = Context.ViewModelJson;
-			connection.LastSentViewModel = Context.ViewModel;
+			connection.Context = Context;
+//			connection.LastSentViewModelJson = Context.ViewModelJson;
+//			connection.LastSentViewModel = Context.ViewModel;
 		}
 	}
 }
