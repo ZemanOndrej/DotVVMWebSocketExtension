@@ -1,6 +1,6 @@
 using DotVVM.Framework.ViewModel;
 
-namespace DotvvmApplication1.ViewModels
+namespace SampleApp.ViewModels
 {
     public class MasterpageViewModel : DotvvmViewModelBase
     {

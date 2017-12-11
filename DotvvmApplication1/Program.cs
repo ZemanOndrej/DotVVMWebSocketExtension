@@ -1,7 +1,7 @@
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 
-namespace DotvvmApplication1
+namespace SampleApp
 {
     public class Program
     {

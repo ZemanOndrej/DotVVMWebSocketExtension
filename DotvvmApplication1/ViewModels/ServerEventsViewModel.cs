@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotVVMWebSocketExtension.WebSocketService;
 
-namespace DotvvmApplication1.ViewModels
+namespace SampleApp.ViewModels
 {
 	public class ServerEventsViewModel : MasterpageViewModel
 	{

@@ -1,6 +1,7 @@
 # BcThesis-DotVVMExtension
 ## TODO
-* hub property in viewmodel and socket path on frontend
-* better resource management
+* hub property in viewmodel 
 * unit tests
-* viewmodel diff sends {} in some responses
+* handle more tasks properly for one connection
+* sample app
+* Facade Object in task

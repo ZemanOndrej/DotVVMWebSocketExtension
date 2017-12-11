@@ -1,10 +1,8 @@
-using DotVVM.Framework;
 using DotVVM.Framework.Configuration;
 using DotVVM.Framework.ResourceManagement;
-using DotVVM.Framework.Routing;
 using DotVVMWebSocketExtension.WebSocketService;
 
-namespace DotvvmApplication1
+namespace SampleApp
 {
     public class DotvvmStartup : IDotvvmStartup
     {

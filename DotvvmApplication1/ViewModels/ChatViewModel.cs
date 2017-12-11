@@ -1,12 +1,12 @@
 using System;
-using DotVVMWebSocketExtension.WebSocketService;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BL.DTO;
 using BL.Facades;
+using DotVVMWebSocketExtension.WebSocketService;
 
-namespace DotvvmApplication1.ViewModels
+namespace SampleApp.ViewModels
 {
 	public class ChatViewModel : MasterpageViewModel
 	{

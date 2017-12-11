@@ -1,7 +1,7 @@
 using System;
 using DotVVMWebSocketExtension.WebSocketService;
 
-namespace DotvvmApplication1.ViewModels
+namespace SampleApp.ViewModels
 {
     public class TestpageViewModel : MasterpageViewModel
     {

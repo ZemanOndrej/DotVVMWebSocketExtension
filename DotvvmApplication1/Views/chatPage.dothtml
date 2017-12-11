@@ -1,4 +1,4 @@
-﻿@viewModel DotvvmApplication1.ViewModels.ChatViewModel, DotvvmApplication1
+﻿@viewModel SampleApp.ViewModels.ChatViewModel, SampleApp
 @masterPage Views/masterpage.dotmaster
 
 <dot:Content ContentPlaceHolderID="MainContent">

@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotVVM.Tracing.ApplicationI
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotVVM.Tracing.ApplicationInsights.Owin", "dotvvm\src\DotVVM.Tracing.ApplicationInsights.Owin\DotVVM.Tracing.ApplicationInsights.Owin.csproj", "{E25432DB-B173-4ED4-96A5-E60DF440DE49}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotvvmApplication1", "DotvvmApplication1\DotvvmApplication1.csproj", "{E4D7CE23-060B-46D1-A3BB-F0A3F5AB69BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApp", "DotvvmApplication1\SampleApp.csproj", "{E4D7CE23-060B-46D1-A3BB-F0A3F5AB69BE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotvvm", "dotvvm", "{EEF36A17-5A88-4EFD-B0CF-FEF12E6B39BE}"
 EndProject

@@ -1,4 +1,4 @@
-﻿@viewModel DotvvmApplication1.ViewModels.ServerEventsViewModel, DotvvmApplication1
+﻿@viewModel SampleApp.ViewModels.ServerEventsViewModel, SampleApp
 @masterPage Views/masterpage.dotmaster
 
 <dot:Content ContentPlaceHolderID="MainContent">
