@@ -36,8 +36,9 @@
         <DotNetCliToolReference Include="DotVVM.Compiler.Light" Version="1.1.5" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\..\dotvvm\src\DotVVM.Framework.Hosting.AspNetCore\DotVVM.Framework.Hosting.AspNetCore.csproj" />
+      <ProjectReference Include="..\..\dotvvm\src\DotVVM.Framework\DotVVM.Framework.csproj" />
+      <ProjectReference Include="..\..\src\DotVVMWebSocketExtension\DotVVMWebSocketExtension.csproj" />
       <ProjectReference Include="..\BL\BL.csproj" />
-      <ProjectReference Include="..\DotVVMWebSocketExtension\DotVVMWebSocketExtension.csproj" />
-      <ProjectReference Include="..\dotvvm\src\DotVVM.Framework\DotVVM.Framework.csproj" />
     </ItemGroup>
 </Project>

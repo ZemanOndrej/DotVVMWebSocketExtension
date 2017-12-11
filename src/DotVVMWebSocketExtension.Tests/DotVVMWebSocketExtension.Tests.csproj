@@ -14,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\dotvvm\src\DotVVM.Framework.Hosting.AspNetCore\DotVVM.Framework.Hosting.AspNetCore.csproj" />
     <ProjectReference Include="..\DotVVMWebSocketExtension\DotVVMWebSocketExtension.csproj" />
-    <ProjectReference Include="..\dotvvm\src\DotVVM.Framework\DotVVM.Framework.csproj" />
   </ItemGroup>
 
 </Project>

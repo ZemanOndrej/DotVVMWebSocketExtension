@@ -12,13 +12,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\DotVVMWebSocketExtension\dotvvm\src\DotVVM.Framework.Hosting.AspNetCore\DotVVM.Framework.Hosting.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\DotVVMWebSocketExtension\dotvvm\src\DotVVM.Framework\DotVVM.Framework.csproj" />
-  </ItemGroup>
 	
 	<ItemGroup>
 		<EmbeddedResource Include="Resources\websocketScript.js"></EmbeddedResource>
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\..\dotvvm\src\DotVVM.Framework.Hosting.AspNetCore\DotVVM.Framework.Hosting.AspNetCore.csproj" />
+	  <ProjectReference Include="..\..\dotvvm\src\DotVVM.Framework\DotVVM.Framework.csproj" />
 	</ItemGroup>
 </Project>
