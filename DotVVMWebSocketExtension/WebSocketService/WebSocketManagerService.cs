@@ -112,14 +112,14 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <param name="task">The task.</param>
 		/// <param name="token">The token.</param>
 		/// <param name="context">LastSentViewModelJson of HTTP request</param>
-		public string AddTask(Task task, string connectionId, CancellationTokenSource token, IDotvvmRequestContext context)
+		public string AddTask(Task task, string connectionId, CancellationTokenSource token)
 		{
 			var taskId = Guid.NewGuid().ToString();
 			if (TaskList.ContainsKey(connectionId))
 			{
 				if (TaskList.TryGetValue(connectionId, out var set))
 				{
-					set.Add(new WebSocketTask(task, taskId, token, context));
+					set.Add(new WebSocketTask(task, taskId, token));
 				}
 			}
 			else
@@ -127,7 +127,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 				TaskList.TryAdd(connectionId,
 					new HashSet<WebSocketTask>
 					{
-						new WebSocketTask(task, taskId, token, context)
+						new WebSocketTask(task, taskId, token)
 					});
 			}
 			return taskId;

@@ -7,13 +7,13 @@ namespace DotVVMWebSocketExtension.WebSocketService
 {
 	public class WebSocketTask
 	{
-		public WebSocketTask(Task task, string taskId, CancellationTokenSource token, IDotvvmRequestContext context)
+		public WebSocketTask(Task task, string taskId, CancellationTokenSource token)
 		{
 			Task = task;
 			TaskId = taskId;
 			CancellationTokenSource = token;
-			Context = context;
-			LastSentViewModel =new JObject();
+//			Context = context;
+//			LastSentViewModel =new JObject();
 		}
 
 		public Task Task { get; set; }
@@ -22,9 +22,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public CancellationTokenSource CancellationTokenSource { get; set; }
 
-		public IDotvvmRequestContext Context { get; set; }
-
-		public JObject LastSentViewModel { get; set; }
+//		public IDotvvmRequestContext Context { get; set; }
+//
+//		public JObject LastSentViewModel { get; set; }
 
 
 	}

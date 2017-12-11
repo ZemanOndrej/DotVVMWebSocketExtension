@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DotVVMWebSocketExtension.WebSocketService;
 
@@ -24,11 +25,11 @@ namespace DotvvmApplication1.ViewModels
 			IsPercentageVisible = true;
 			Percentage = 0;
 			Text = "Action is starting";
-			Hub.CreateAndRunTask(LongTaskAsync);
+			Hub.CreateAndRunTask<ServerEventsViewModel>(LongTaskAsync);
 
 		}
 
-		public async Task LongTaskAsync( CancellationToken token)
+		public async Task LongTaskAsync(ServerEventsViewModel viewModel, CancellationToken token)
 		{
 			
 			for (int i = 1; i < 101; ++i)
@@ -41,18 +42,26 @@ namespace DotvvmApplication1.ViewModels
 //					await hub.UpdateViewModelInTaskFromCurrentClientAsync();
 //				}
 
-				Percentage = i;
-				await Hub.UpdateViewModelOnCurrentClientAsync();
+				viewModel.Percentage = i;
+				await Hub.ChangeViewModelForCurrentConnection();
 				await Task.Delay(10);
 			}
-			Text = "Task is Complete";
-			IsPercentageVisible = false;
-			await Hub.UpdateViewModelOnCurrentClientAsync();
+			viewModel.Text = "Task is Complete";
+			viewModel.IsPercentageVisible = false;
+			Console.WriteLine(Context);
+			await Hub.ChangeViewModelForCurrentConnection();
 		}
 
 		public void StopTask()
 		{
 			Hub.StopTask();
+		}
+
+
+		public override Task PreRender()
+		{
+			Hub.SaveCurrentState();
+			return base.PreRender();
 		}
 	}
 }

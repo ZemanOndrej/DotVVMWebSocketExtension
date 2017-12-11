@@ -8,17 +8,18 @@ namespace DotVVMWebSocketExtension.WebSocketService
 {
 	public class Connection : IDisposable
 	{
-//		public JObject LastSentViewModelJson { get; set; }
-//
-//		public JObject ChangedViewModelJson { get; set; }
+		public ViewModelState ViewModelState { get; set; }
 
 		public WebSocket Socket { get; set; }
 
-		public IDotvvmRequestContext Context { get; set; }
+
+
+		public Connection()
+		{
+			ViewModelState=new ViewModelState();
+		}
 
 		public bool IsConnected => Socket?.State == WebSocketState.Open;
-
-//		public object LastSentViewModel { get; set; }
 
 		protected bool Equals(Connection other)
 		{

@@ -101,16 +101,14 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
+		#endregion
 
-		public async Task UpdateViewModelOnCurrentClientAsync()
+		public async Task ChangeViewModelForCurrentConnection()
 		{
 			var connection = WebSocketService.GetConnetionById(ConnectionId);
 
-			Serializer.BuildViewModel(Context);
-//			connection.LastSentViewModelJson = (JObject) Context.ViewModelJson.DeepClone();
-//			connection.LastSentViewModel = Context.ViewModel;
-			connection.Context = Context;
-			var serializedString = Serializer.SerializeViewModel(Context);
+			Serializer.BuildViewModel(connection.ViewModelState);
+			var serializedString = Serializer.SerializeViewModel(connection.ViewModelState);
 			try
 			{
 				await SendMessageToClientAsync(serializedString);
@@ -123,42 +121,21 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
-		#endregion
-
-		#region TaskManagement
-
-		public string CreateAndRunTask(Func<CancellationToken, Task> func)
+		public async Task ChangeViewModelForConnectionsAsync<T>(Action<T> action, List<string> connectionIdList)
 		{
-			var tokenSource = new CancellationTokenSource();
-			return WebSocketService.AddTask(
-				func.Invoke(tokenSource.Token).ContinueWith(s => StopTask(), tokenSource.Token),
-				ConnectionId,
-				tokenSource, Context);
-		}
-
-		public void StopTask()
-		{
-			WebSocketService.StopAllTasksForSocket(ConnectionId);
-		}
-
-		#endregion
-
-
-		public async Task ChangeViewModelForSocketsAsync<T>(Action<T> action, List<string> socketIdList)
-		{
-			foreach (var socketId in socketIdList)
+			foreach (var connectionId in connectionIdList)
 			{
-				if (ConnectionId == socketId) continue;
-				var connection = WebSocketService.GetConnetionById(socketId);
+				if (ConnectionId == connectionId) continue;
+				var connection = WebSocketService.GetConnetionById(connectionId);
 				if (connection == null) continue;
-				action.Invoke((T) connection.Context.ViewModel);
-				Serializer.BuildViewModel(connection.Context);
+				action.Invoke((T) connection.ViewModelState.LastSentViewModel);
+				Serializer.BuildViewModel(connection.ViewModelState);
 
-				var serializedString = Serializer.SerializeViewModel(connection.Context);
+				var serializedString = Serializer.SerializeViewModel(connection.ViewModelState);
 
 				try
 				{
-					await SendMessageToSocketAsync(socketId, serializedString);
+					await SendMessageToSocketAsync(connectionId, serializedString);
 				}
 				catch (WebSocketException e)
 				{
@@ -169,21 +146,40 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		}
 
 
-		public async Task UpdateViewModelInTaskFromCurrentClientAsync()
+		#region TaskManagement
+
+		public string CreateAndRunTask<T>(Func<T, CancellationToken, Task> func)
 		{
-			await SendMessageToSocketAsync(ConnectionId,
-				JsonConvert.SerializeObject(new {action = "viewModelSynchronizationRequest"}, Formatting.None));
+			var tokenSource = new CancellationTokenSource();
+			var connection = WebSocketService.GetConnetionById(ConnectionId);
+			var lastSentViewModel = (T) Context.ViewModel;
+
+			connection.ViewModelState.LastSentViewModel = lastSentViewModel;
+
+			return WebSocketService.AddTask(
+				func.Invoke(lastSentViewModel, tokenSource.Token),
+//					.ContinueWith(s => StopTask(), tokenSource.Token),
+				ConnectionId,
+				tokenSource);
 		}
 
-		public void SaveContext()
+		public void StopTask()
+		{
+			WebSocketService.StopAllTasksForSocket(ConnectionId);
+		}
+
+		#endregion
+
+		public void SaveCurrentState()
 		{
 			if (ConnectionId == null) return;
 
 			var connection = WebSocketService.GetConnetionById(ConnectionId);
-			Serializer.BuildViewModel(Context);
-			connection.Context = Context;
-//			connection.LastSentViewModelJson = Context.ViewModelJson;
-//			connection.LastSentViewModel = Context.ViewModel;
+
+			connection.ViewModelState.CsrfToken = Context.CsrfToken;
+			connection.ViewModelState.LastSentViewModel = Context.ViewModel;
+			Serializer.BuildViewModel(connection.ViewModelState);
+			connection.ViewModelState.LastSentViewModelJson = connection.ViewModelState.ChangedViewModelJson;
 		}
 	}
 }

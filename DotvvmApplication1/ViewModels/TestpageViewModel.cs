@@ -17,7 +17,7 @@ namespace DotvvmApplication1.ViewModels
 	    public void Start()
 	    {
 		    Console.WriteLine(Context.HttpContext.Request);
-		    var viewModelFromClientAsync = Hub.UpdateViewModelInTaskFromCurrentClientAsync();
+//		    var viewModelFromClientAsync = Hub.UpdateViewModelInTaskFromCurrentClientAsync();
 	    }
 	}
 }
