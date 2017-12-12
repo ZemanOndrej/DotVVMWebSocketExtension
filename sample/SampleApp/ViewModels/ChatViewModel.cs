@@ -4,13 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using BL.DTO;
 using BL.Facades;
-using DotVVMWebSocketExtension.WebSocketService;
 
 namespace SampleApp.ViewModels
 {
 	public class ChatViewModel : MasterpageViewModel
 	{
-		public ChatService Hub { get; set; }
+		public ChatService Service { get; set; }
 
 		public ChatFacade ChatFacade { get; set; }
 
@@ -24,7 +23,7 @@ namespace SampleApp.ViewModels
 		public bool IsLoggedIn { get; set; }
 
 
-		public ChatViewModel(ChatService wsHub, ChatFacade facade)
+		public ChatViewModel(ChatService wsService, ChatFacade facade)
 		{
 			ChatFacade = facade;
 			CurrentUser = new UserDto();
@@ -32,13 +31,13 @@ namespace SampleApp.ViewModels
 			Messages = new List<ChatMessageDto>();
 			CurrentRoom = new ChatRoomDto();
 
-			Hub = wsHub;
+			Service = wsService;
 		}
 
 		public void LogIn()
 		{
-			if (string.IsNullOrEmpty(CurrentUser.Name) || string.IsNullOrEmpty(Hub.ConnectionId)) return;
-			CurrentUser.ConnectionId = Hub.ConnectionId;
+			if (string.IsNullOrEmpty(CurrentUser.Name) || string.IsNullOrEmpty(Service.ConnectionId)) return;
+			CurrentUser.ConnectionId = Service.ConnectionId;
 			ChatRooms = ChatFacade.GetAllChatRooms();
 			CurrentUser.Id = ChatFacade.CreateUser(CurrentUser);
 			IsLoggedIn = true;
@@ -56,17 +55,18 @@ namespace SampleApp.ViewModels
 					Time = DateTime.Now,
 					UserName = CurrentUser.Name
 				};
-				ChatFacade.GetChatMessageById(ChatFacade.SendMessageToChatRoom(CurrentUser, msg));
+				msg.Id = ChatFacade.SendMessageToChatRoom(CurrentUser, msg);
 				Messages.Add(msg);
 				NewMessage = "";
 
-				await Hub.ChangeViewModelForConnectionsAsync((ChatViewModel viewModel) =>
-				{
-					viewModel.Messages.Add(msg);
-				}, ChatFacade
-					.GetAllUsersFromChatRoom(CurrentRoom.Id)
-					.Select(s => s.ConnectionId)
-					.ToList());
+				await Service.ChangeViewModelForConnectionsAsync((ChatViewModel viewModel) =>
+					{
+						viewModel.Messages.Add(msg);
+					},
+					ChatFacade
+						.GetAllUsersFromChatRoom(CurrentRoom.Id)
+						.Select(s => s.ConnectionId)
+						.ToList());
 			}
 		}
 
@@ -81,12 +81,10 @@ namespace SampleApp.ViewModels
 			ChatRooms.Add(newChatRoom);
 			NewRoomName = "";
 
-			await Hub.ChangeViewModelForConnectionsAsync((ChatViewModel viewModel) =>
-			{
-				viewModel.ChatRooms.Add(newChatRoom);
-			}, ChatFacade.GetAllConnectedUsers()
-				.Select(s => s.ConnectionId)
-				.ToList());
+			await Service.ChangeViewModelForConnectionsAsync((ChatViewModel viewModel) => { viewModel.ChatRooms.Add(newChatRoom); },
+				ChatFacade.GetAllConnectedUsers()
+					.Select(s => s.ConnectionId)
+					.ToList());
 		}
 
 		public void JoinRoom(int id)
@@ -100,7 +98,7 @@ namespace SampleApp.ViewModels
 
 		public override Task PreRender()
 		{
-			Hub.SaveCurrentState();
+			Service.SaveCurrentState();
 			return base.PreRender();
 		}
 	}

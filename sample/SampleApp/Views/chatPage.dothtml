@@ -3,7 +3,7 @@
 
 <dot:Content ContentPlaceHolderID="MainContent">
 
-	SocketId<{{value: Hub.ConnectionId}}>
+	SocketId<{{value: Service.ConnectionId}}>
 
 	<div>UserName:{{value: CurrentUser.Name}}</div>
 	<div>Room:{{value: CurrentRoom.Name}}</div>

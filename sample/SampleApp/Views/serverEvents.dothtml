@@ -10,10 +10,8 @@
 		<span>Text:{{value: Text}}</span>
 	</div>
 	
-
-
 	SocketId
-	<{{value: Hub.ConnectionId}}>
+	<{{value: Service.ConnectionId}}>
 	<dot:Button Click="{command: StopTask()}">stop</dot:Button>
 
 	<dot:RequiredResource Name="websocketScript" />

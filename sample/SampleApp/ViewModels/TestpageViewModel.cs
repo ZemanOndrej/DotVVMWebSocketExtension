@@ -17,7 +17,7 @@ namespace SampleApp.ViewModels
 	    public void Start()
 	    {
 		    Console.WriteLine(Context.HttpContext.Request);
-//		    var viewModelFromClientAsync = Hub.UpdateViewModelInTaskFromCurrentClientAsync();
+//		    var viewModelFromClientAsync = Service.UpdateViewModelInTaskFromCurrentClientAsync();
 	    }
 	}
 }

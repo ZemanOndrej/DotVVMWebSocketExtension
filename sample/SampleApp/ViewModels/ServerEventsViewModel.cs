@@ -7,15 +7,15 @@ namespace SampleApp.ViewModels
 {
 	public class ServerEventsViewModel : MasterpageViewModel
 	{
-		public WebSocketService Hub { get; set; } 
+		public WebSocketService Service { get; set; } 
 		public string Text { get; set; }
 		public long Percentage { get; set; }
 		public bool IsPercentageVisible { get; set; }
 
 
-		public ServerEventsViewModel(WebSocketService hub)
+		public ServerEventsViewModel(WebSocketService service)
 		{
-			Hub = hub;
+			Service = service;
 			Text = "No action";
 			IsPercentageVisible = false;
 		}
@@ -25,7 +25,7 @@ namespace SampleApp.ViewModels
 			IsPercentageVisible = true;
 			Percentage = 0;
 			Text = "Action is starting";
-			Hub.CreateAndRunTask<ServerEventsViewModel>(LongTaskAsync);
+			Service.CreateAndRunTask<ServerEventsViewModel>(LongTaskAsync);
 
 		}
 
@@ -39,28 +39,28 @@ namespace SampleApp.ViewModels
 				token.ThrowIfCancellationRequested();
 //				if (i==50)
 //				{
-//					await hub.UpdateViewModelInTaskFromCurrentClientAsync();
+//					await service.UpdateViewModelInTaskFromCurrentClientAsync();
 //				}
 
 				viewModel.Percentage = i;
-				await Hub.ChangeViewModelForCurrentConnection();
+				await Service.ChangeViewModelForCurrentConnection();
 				await Task.Delay(10);
 			}
 			viewModel.Text = "Task is Complete";
 			viewModel.IsPercentageVisible = false;
 			Console.WriteLine(Context);
-			await Hub.ChangeViewModelForCurrentConnection();
+			await Service.ChangeViewModelForCurrentConnection();
 		}
 
 		public void StopTask()
 		{
-			Hub.StopTask();
+			Service.StopTask();
 		}
 
 
 		public override Task PreRender()
 		{
-			Hub.SaveCurrentState();
+			Service.SaveCurrentState();
 			return base.PreRender();
 		}
 	}
