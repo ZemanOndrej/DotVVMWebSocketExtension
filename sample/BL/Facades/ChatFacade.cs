@@ -82,5 +82,11 @@ namespace BL.Facades
 		{
 			return Mapping.Mapper.Map<ChatMessageDto>(Context.ChatMessages.Find(id));
 		}
+
+		public void DeteleDisconnectedUsers(string connectionId)
+		{
+			Context.Users.Remove(Context.Users.First(u => u.ConnectionId == connectionId));
+			Context.SaveChanges();
+		}
 	}
 }

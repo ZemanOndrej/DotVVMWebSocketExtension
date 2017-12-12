@@ -7,9 +7,9 @@ namespace SampleApp.ViewModels
     {
 	    public string Text { get; set; }
 
-		public WebSocketFacade Hub { get; set; }
+		public WebSocketService Hub { get; set; }
 
-	    public TestpageViewModel(WebSocketFacade hub)
+	    public TestpageViewModel(WebSocketService hub)
 	    {
 		    Hub = hub;
 	    }

@@ -7,13 +7,13 @@ namespace SampleApp.ViewModels
 {
 	public class ServerEventsViewModel : MasterpageViewModel
 	{
-		public WebSocketFacade Hub { get; set; } // TODO NAME OF HUB VARIABLE
+		public WebSocketService Hub { get; set; } 
 		public string Text { get; set; }
 		public long Percentage { get; set; }
 		public bool IsPercentageVisible { get; set; }
 
 
-		public ServerEventsViewModel(WebSocketFacade hub)
+		public ServerEventsViewModel(WebSocketService hub)
 		{
 			Hub = hub;
 			Text = "No action";

@@ -6,13 +6,14 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using DotVVM.Framework.Hosting;
+using Microsoft.AspNetCore.Http;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
 	/// <summary>
 	/// service that stores SocketList and LongRunningTask list and operations on them
 	/// </summary>
-	public class WebSocketManagerService
+	public class WebSocketManager
 	{
 		#region PropsAndConstructor
 
@@ -20,13 +21,17 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public ConcurrentDictionary<string, HashSet<WebSocketTask>> TaskList { get; }
 
+		public ConcurrentDictionary<Type, PathString> WebSocketPaths { get; set; }
+
+
 		/// <summary>
-		/// Initializes a new instance of the <see cref="WebSocketManagerService"/> class.
+		/// Initializes a new instance of the <see cref="WebSocketManager"/> class.
 		/// </summary>
-		public WebSocketManagerService()
+		public WebSocketManager()
 		{
 			Connections = new ConcurrentDictionary<string, Connection>();
 			TaskList = new ConcurrentDictionary<string, HashSet<WebSocketTask>>();
+			WebSocketPaths = new ConcurrentDictionary<Type, PathString>();
 		}
 
 		#endregion
@@ -34,7 +39,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		#region ConnectionManagement
 
 		/// <summary>
-		/// Returns WebSocket Object with ID
+		/// Returns WebSocketManager Object with ID
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
@@ -45,7 +50,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		}
 
 		/// <summary>
-		/// Returns Socket Id of given WebSocket object
+		/// Returns Socket Id of given WebSocketManager object
 		/// </summary>
 		/// <param name="socket">The socket.</param>
 		/// <returns></returns>

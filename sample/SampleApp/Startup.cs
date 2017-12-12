@@ -45,8 +45,10 @@ namespace SampleApp
 			loggerFactory.AddConsole();
 
 			// use DotVVM
-			app.MapWebSocketService();
 			var dotvvmConfiguration = app.UseDotVVM<DotvvmStartup>(env.ContentRootPath);
+			app.UseWebSockets();
+			app.MapWebSocketService();
+			app.MapWebSocketService("/wsChat", app.ApplicationServices.GetService<ChatService>());
 			app.UseStaticFiles();
 			app.UseDefaultFiles();
 		}

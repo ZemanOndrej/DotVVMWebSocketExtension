@@ -11,7 +11,7 @@
 <body>
 
 
-	<dot:RouteLink RouteName="Event">ServerEvents</dot:RouteLink>
+	<dot:RouteLink RouteName="Event">ServerEvents</dot:RouteLink> 
 	<dot:RouteLink RouteName="Chat">Chat</dot:RouteLink>
 	<dot:RouteLink RouteName="TestPage">TestPage</dot:RouteLink>
 	<dot:RouteLink RouteName="calculator">Calculator</dot:RouteLink>

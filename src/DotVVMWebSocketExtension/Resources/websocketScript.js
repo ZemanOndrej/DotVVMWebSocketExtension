@@ -1,8 +1,7 @@
 ﻿var initWs = function() {
 	var viewModelName = "root";
-	var uri = "ws://" + window.location.host + "/ws";
+	var uri = "ws://" + window.location.host + dotvvm.viewModelObservables[viewModelName]().Hub().Path();
 	var wsCount = 0;
-
 
 	function connect() {
 		var socket = new WebSocket(uri);
@@ -35,7 +34,6 @@
 					viewModel: dotvvm.serialization.serialize(viewModel,
 						{ pathMatcher: function(val) { return context && val === context.$data; } }),
 				};
-
 
 				socket.send(ko.toJSON(data));
 				break;

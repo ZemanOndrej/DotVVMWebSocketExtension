@@ -10,7 +10,8 @@ namespace SampleApp.ViewModels
 {
 	public class ChatViewModel : MasterpageViewModel
 	{
-		public WebSocketFacade Hub { get; set; }
+		public ChatService Hub { get; set; }
+
 		public ChatFacade ChatFacade { get; set; }
 
 		public List<ChatMessageDto> Messages { get; set; }
@@ -23,7 +24,7 @@ namespace SampleApp.ViewModels
 		public bool IsLoggedIn { get; set; }
 
 
-		public ChatViewModel(WebSocketFacade wsHub, ChatFacade facade)
+		public ChatViewModel(ChatService wsHub, ChatFacade facade)
 		{
 			ChatFacade = facade;
 			CurrentUser = new UserDto();
