@@ -5,11 +5,12 @@
 
 	SocketId<{{value: Service.ConnectionId}}>
 
-	<div>UserName:{{value: CurrentUser.Name}}</div>
-	<div>Room:{{value: CurrentRoom.Name}}</div>
-	<div class="{value: IsLoggedIn ? 'hidden':'nothidden'}">
-		<dot:TextBox Text="{value: CurrentUser.Name}" placeholder="Enter your name" />
-		<dot:Button Click="{command: LogIn()}"> LogIn</dot:Button>
+	<div class="{value: IsLoggedIn ? 'hidden':'nothidden'}" id="overlay">
+		<div id="loginform">
+			<dot:TextBox Text="{value: CurrentUser.Name}" placeholder="Enter your name" />
+			<dot:Button Click="{command: LogIn()}"> LogIn</dot:Button>
+		</div>
+
 	</div>
 	
 
@@ -17,43 +18,42 @@
 
 	<div class="{value: !IsLoggedIn ? 'hidden':'nothidden'}">
 
-		<dot:TextBox Text="{value: NewRoomName}" placeholder="Enter new chatroom Name" />
 
-		<dot:Button Click="{command: CreateRoom()}">Create</dot:Button>
+		<div id="chatroomMenu">
+			<dot:TextBox Text="{value: NewRoomName}" placeholder="Enter new chatroom Name" />
+			<dot:Button Click="{command: CreateRoom()}">Create</dot:Button>
 
-
-		<dot:Repeater DataSource="{value: ChatRooms}">
-			<ItemTemplate>
-				<div>
-					<span>{{value: Name}}</span>
-					<dot:Button Click="{command: _parent.JoinRoom(Id)}">Join</dot:Button>
-				</div>
-			
-			</ItemTemplate>
-		</dot:Repeater>
-
-
-
-
-		<div class="{value: !IsInRoom ? 'hidden':'nothidden'}>
-			<dot:TextBox Text="{value: NewMessage}" placeholder="Enter your text" />
-			<dot:Button Click="{command: SendMessage()}">Send</dot:Button>
-
-
-			<dot:Repeater DataSource="{value: Messages}">
+			<dot:Repeater DataSource="{value: ChatRooms}">
 				<ItemTemplate>
 					<div>
+						<span>{{value: Name}}</span>
+						<dot:Button Click="{command: _parent.JoinRoom(Id)}">Join</dot:Button>
+					</div>
+
+				</ItemTemplate>
+			</dot:Repeater>
+		</div>
+		
+		<div class="{value: !IsInRoom ? 'hidden':'nothidden'}" id="wrapper">
+			
+
+			<div>Wellcome {{value: CurrentUser.Name}}!</div>
+			<div>Room:{{value: CurrentRoom.Name}}</div>
+			<dot:Repeater DataSource="{value: Messages}" ID="chatbox">
+				<ItemTemplate>
+					<div class="msgline">
 						<span>{{value: Time}}</span>
 						<span>{{value: UserName}}</span>:
 						<span> {{value: Message}}</span>
 					</div>
 				</ItemTemplate>
 			</dot:Repeater>
+			<dot:TextBox Text="{value: NewMessage}" placeholder="Enter your text" id="usermsg" />
+			<dot:Button Click="{command: SendMessage()}" id="submitmsg">Send</dot:Button>
 
 		</div>
 	</div>
 	
-			
 			<dot:RequiredResource Name="websocketScript" />
 </dot:Content>
 

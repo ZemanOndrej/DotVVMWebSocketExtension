@@ -90,9 +90,10 @@ namespace SampleApp.ViewModels
 		public void JoinRoom(int id)
 		{
 			if (id == CurrentRoom.Id) return;
+			CurrentRoom = ChatFacade.GetChatRoomById(id);
 			ChatFacade.AddUserToChatRoom(id, CurrentUser);
-			CurrentRoom.Id = id;
-			Messages = ChatFacade.GetAllMessagesFromRoom(id);
+
+			Messages = ChatFacade.GetRecentMessagesFromRoom(id);
 			IsInRoom = true;
 		}
 

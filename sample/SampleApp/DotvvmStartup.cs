@@ -39,6 +39,16 @@ namespace SampleApp
 				Location = new EmbeddedResourceLocation(typeof(WebSocketMiddleware).Assembly, "DotVVMWebSocketExtension.Resources.websocketScript.js"),
 				Dependencies = new string[0]
 			});
+	        config.Resources.Register("bootstrap-css", new StylesheetResource()
+	        {
+		        Location = new UrlResourceLocation("~/Styles/bootstrap.min.css")
+	        });
+	        config.Resources.Register("bootstrap", new ScriptResource()
+	        {
+		        Location = new UrlResourceLocation("~/Scripts/bootstrap.min.js"),
+		        Dependencies = new[] { "bootstrap-css" }
+	        });
+
 		}
     }
 }

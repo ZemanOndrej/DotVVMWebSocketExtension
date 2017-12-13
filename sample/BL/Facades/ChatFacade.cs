@@ -63,7 +63,12 @@ namespace BL.Facades
 
 		public List<ChatMessageDto> GetAllMessagesFromRoom(int id)
 		{
-			var msgs = Context.ChatMessages.Where(c => c.ChatRoom.Id == id).OrderByDescending(m=>m.Time).Take(2).Include(u => u.User).ToList();
+			var msgs = Context.ChatMessages.Where(c => c.ChatRoom.Id == id).OrderByDescending(m=>m.Time).Include(u => u.User).ToList();
+			return Mapping.Mapper.Map<List<ChatMessageDto>>(msgs);
+		}
+		public List<ChatMessageDto> GetRecentMessagesFromRoom(int id)
+		{
+			var msgs = Context.ChatMessages.Where(c => c.ChatRoom.Id == id).OrderByDescending(m=>m.Time).Take(5).Include(u => u.User).ToList();
 			return Mapping.Mapper.Map<List<ChatMessageDto>>(msgs);
 		}
 
@@ -82,11 +87,17 @@ namespace BL.Facades
 		{
 			return Mapping.Mapper.Map<ChatMessageDto>(Context.ChatMessages.Find(id));
 		}
+		public ChatRoomDto GetChatRoomById(int id)
+		{
+			return Mapping.Mapper.Map<ChatRoomDto>(Context.ChatRooms.Find(id));
+		}
 
 		public void DeteleDisconnectedUsers(string connectionId)
 		{
 			Context.Users.Remove(Context.Users.First(u => u.ConnectionId == connectionId));
 			Context.SaveChanges();
 		}
+
+
 	}
 }

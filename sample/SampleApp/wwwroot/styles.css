@@ -1,4 +1,112 @@
-﻿
-.hidden {
-	display: none
+﻿.hidden { display: none }
+
+#overlay {
+	position: fixed; /* Sit on top of the page content */
+	width: 100%; /* Full width (cover the whole page) */
+	height: 100%; /* Full height (cover the whole page) */
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+	z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+	cursor: pointer; /* Add a pointer on hover */
+}
+
+#loginform {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	font-size: 50px;
+	color: black;
+	transform: translate(-50%, -50%);
+	-ms-transform: translate(-50%, -50%);
+}
+
+
+body {
+	font: 12px arial;
+	color: #222;
+	text-align: center;
+}
+
+
+input { 
+	font: 12px arial;
+}
+
+a {
+	color: #0000FF;
+	text-decoration: none;
+}
+
+a:hover { text-decoration: underline; }
+
+#wrapper {
+	margin: 0 auto;
+	padding-bottom: 25px;
+	background: #EBF4FB;
+	width: 504px;
+	border: 1px solid #ACD8F0;
+}
+  
+  
+#chatbox {
+	text-align: left;
+	margin: 0 auto;
+	margin-bottom: 25px;
+	padding: 10px;
+	background: #fff;
+	height: 270px;
+	width: 430px;
+	border: 1px solid #ACD8F0;
+	overflow: auto;
+	top: 200px;
+}
+#chatroomMenu {
+	float: left;
+}
+
+#usermsg {
+	width: 395px;
+	border: 1px solid #ACD8F0;
+}
+  
+  
+.error { color: #ff0000; }
+
+#menu { padding: 12.5px 25px 12.5px 25px; }
+
+.welcome { float: left; }
+
+.logout { float: right; }
+
+.msgln { margin: 0 0 2px 0; }
+
+.navbar {
+	margin-bottom: 0;
+	border-radius: 0;
+}
+
+/* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+
+.row.content { height: 450px }
+    
+    
+/* Set black background color, white text and some padding */
+
+footer {
+	background-color: #555;
+	padding: 15px;
+}
+
+/* On small screens, set height to 'auto' for sidenav and grid */
+
+@media screen and (max-width: 767px) {
+	.sidenav {
+		height: auto;
+		padding: 15px;
+	}
+
+	.row.content { height: auto; }
 }
