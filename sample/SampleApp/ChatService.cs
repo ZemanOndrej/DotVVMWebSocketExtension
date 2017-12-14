@@ -1,6 +1,7 @@
 ﻿using System.Net.WebSockets;
 using BL.Facades;
 using DotVVM.Framework.Hosting;
+using DotVVM.Framework.Runtime;
 using DotVVMWebSocketExtension.WebSocketService;
 
 namespace SampleApp

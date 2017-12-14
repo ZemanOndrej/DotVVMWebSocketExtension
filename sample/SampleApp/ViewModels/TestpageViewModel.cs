@@ -6,18 +6,17 @@ namespace SampleApp.ViewModels
     public class TestpageViewModel : MasterpageViewModel
     {
 	    public string Text { get; set; }
+		public WebSocketService Service { get; set; }
 
-		public WebSocketService Hub { get; set; }
-
-	    public TestpageViewModel(WebSocketService hub)
+	    public TestpageViewModel(WebSocketService service)
 	    {
-		    Hub = hub;
+		    Service = service;
 	    }
 
 	    public void Start()
 	    {
 		    Console.WriteLine(Context.HttpContext.Request);
-//		    var viewModelFromClientAsync = Service.UpdateViewModelInTaskFromCurrentClientAsync();
+//		    var updateViewModelInTaskFromCurrentClientAsync = 
 	    }
 	}
 }

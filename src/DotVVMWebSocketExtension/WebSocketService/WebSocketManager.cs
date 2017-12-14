@@ -124,7 +124,13 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			{
 				if (TaskList.TryGetValue(connectionId, out var set))
 				{
-					set.Add(new WebSocketTask(task, taskId, token));
+					set.Add(new WebSocketTask
+					{
+						CancellationTokenSource = token,
+						Task = task,
+						TaskId = taskId,
+						ConnectionId = connectionId
+					});
 				}
 			}
 			else
@@ -132,7 +138,13 @@ namespace DotVVMWebSocketExtension.WebSocketService
 				TaskList.TryAdd(connectionId,
 					new HashSet<WebSocketTask>
 					{
-						new WebSocketTask(task, taskId, token)
+						new WebSocketTask
+						{
+							CancellationTokenSource = token,
+							Task = task,
+							TaskId = taskId,
+							ConnectionId = connectionId
+						}
 					});
 			}
 			return taskId;

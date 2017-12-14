@@ -11,7 +11,7 @@
 			console.log("opened connection to " + uri + "; ");
 		};
 		socket.onclose = function(event) {
-			console.log("closed connection from " + uri);
+			console.log("closed connection from " + uri,event);
 		};
 		socket.onmessage = function(event) {
 			console.log("onmessage", event.data);

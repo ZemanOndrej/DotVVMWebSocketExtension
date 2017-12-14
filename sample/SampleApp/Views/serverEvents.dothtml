@@ -12,6 +12,9 @@
 	
 	SocketId
 	<{{value: Service.ConnectionId}}>
+
+
+	<dot:TextBox Text="{value: Text2}"/>
 	<dot:Button Click="{command: StopTask()}">stop</dot:Button>
 
 	<dot:RequiredResource Name="websocketScript" />

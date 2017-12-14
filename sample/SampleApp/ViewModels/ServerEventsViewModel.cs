@@ -7,8 +7,9 @@ namespace SampleApp.ViewModels
 {
 	public class ServerEventsViewModel : MasterpageViewModel
 	{
-		public WebSocketService Service { get; set; } 
+		public WebSocketService Service { get; set; }
 		public string Text { get; set; }
+		public string Text2 { get; set; }
 		public long Percentage { get; set; }
 		public bool IsPercentageVisible { get; set; }
 
@@ -17,6 +18,7 @@ namespace SampleApp.ViewModels
 		{
 			Service = service;
 			Text = "No action";
+			Text2 = "1337";
 			IsPercentageVisible = false;
 		}
 
@@ -25,31 +27,35 @@ namespace SampleApp.ViewModels
 			IsPercentageVisible = true;
 			Percentage = 0;
 			Text = "Action is starting";
-			Service.CreateAndRunTask<ServerEventsViewModel>(LongTaskAsync);
-
+			Service.CreateAndRunTask<WebSocketService>(LongTaskAsync);
 		}
 
-		public async Task LongTaskAsync(ServerEventsViewModel viewModel, CancellationToken token)
+		public async Task LongTaskAsync(WebSocketService webSocketService, CancellationToken cancellationToken)
 		{
-			
-			for (int i = 1; i < 101; ++i)
+			for (int i = 1; i < 500; ++i)
 			{
-				await Task.Delay(10);
+				await Task.Delay(20);
+				cancellationToken.ThrowIfCancellationRequested();
+				if (i == 50)
+				{
+					await Service.SendSyncReqeustToClient();
+				}
 
-				token.ThrowIfCancellationRequested();
-//				if (i==50)
-//				{
-//					await service.UpdateViewModelInTaskFromCurrentClientAsync();
-//				}
+				Console.WriteLine(((ServerEventsViewModel) Context.ViewModel).Text2);
 
-				viewModel.Percentage = i;
-				await Service.ChangeViewModelForCurrentConnection();
-				await Task.Delay(10);
+				await webSocketService.ChangeViewModelForCurrentConnection((ServerEventsViewModel changes) =>
+				{
+					changes.Percentage = i;
+				});
+				await Task.Delay(20);
 			}
-			viewModel.Text = "Task is Complete";
-			viewModel.IsPercentageVisible = false;
-			Console.WriteLine(Context);
-			await Service.ChangeViewModelForCurrentConnection();
+
+
+			await webSocketService.ChangeViewModelForCurrentConnection((ServerEventsViewModel changes) =>
+			{
+				changes.Text = "Task is Complete";
+				changes.IsPercentageVisible = false;
+			});
 		}
 
 		public void StopTask()

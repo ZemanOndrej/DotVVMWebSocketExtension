@@ -1,4 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.WebSockets;
+using System.Threading;
 using System.Threading.Tasks;
 using DotVVM.Framework.Hosting;
 using Newtonsoft.Json.Linq;
@@ -7,14 +10,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 {
 	public class WebSocketTask
 	{
-		public WebSocketTask(Task task, string taskId, CancellationTokenSource token)
-		{
-			Task = task;
-			TaskId = taskId;
-			CancellationTokenSource = token;
-//			Context = context;
-//			LastSentViewModel =new JObject();
-		}
 
 		public Task Task { get; set; }
 
@@ -22,9 +17,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public CancellationTokenSource CancellationTokenSource { get; set; }
 
-//		public IDotvvmRequestContext Context { get; set; }
-//
-//		public JObject LastSentViewModel { get; set; }
+		public string ConnectionId { get; set; }
 
 
 	}

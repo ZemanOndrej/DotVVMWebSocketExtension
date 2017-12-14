@@ -57,7 +57,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 						{
 							messageResult = await reader.ReadToEndAsync();
 						}
-						await Service.ReceiveViewModelAsync(socket, result, messageResult);
+						Service.ReceiveViewModel(socket, result, messageResult);
 					}
 					else if (result.MessageType == WebSocketMessageType.Close)
 					{
