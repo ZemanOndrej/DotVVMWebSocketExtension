@@ -39,7 +39,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public virtual async Task OnConnected(WebSocket socket)
 		{
 			ConnectionId = WebSocketManager.AddConnection(new Connection {Socket = socket});
-			await SendMessageToSocketAsync(socket,
+			await SendMessageToClientAsync(socket,
 				JsonConvert.SerializeObject(new {socketId = ConnectionId, action = "webSocketInit"}, Formatting.None));
 		}
 
@@ -63,13 +63,13 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#endregion
 
-		public async Task ReceiveMessageAsync(WebSocket socket, WebSocketReceiveResult result, string message)
+		public async Task ReceiveViewModelAsync(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
 			Console.WriteLine(WebSocketManager.TaskList.Count);
 			var o = JsonConvert.DeserializeObject(message);
 			//TODO taskmanagement
 
-			await SendMessageToSocketAsync(socket,
+			await SendMessageToClientAsync(socket,
 				JsonConvert.SerializeObject(
 					new
 					{
@@ -81,7 +81,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#region Send&Update ViewModel
 
-		protected async Task SendMessageToSocketAsync(WebSocket socket, string message)
+		protected async Task SendMessageToClientAsync(WebSocket socket, string message)
 		{
 			if (socket?.State == WebSocketState.Open)
 			{
@@ -90,17 +90,17 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
-		protected async Task SendMessageToSocketAsync(string socketId, string message) =>
-			await SendMessageToSocketAsync(WebSocketManager.GetConnetionById(socketId).Socket, message);
+		protected async Task SendMessageToClientAsync(string socketId, string message) =>
+			await SendMessageToClientAsync(WebSocketManager.GetConnetionById(socketId).Socket, message);
 
 		protected async Task SendMessageToClientAsync(string message) =>
-			await SendMessageToSocketAsync(WebSocketManager.GetConnetionById(ConnectionId).Socket, message);
+			await SendMessageToClientAsync(WebSocketManager.GetConnetionById(ConnectionId).Socket, message);
 
 		protected async Task SendMessageToAllAsync(string message)
 		{
 			foreach (var connection in WebSocketManager.Connections)
 			{
-				await SendMessageToSocketAsync(connection.Value.Socket, message);
+				await SendMessageToClientAsync(connection.Value.Socket, message);
 			}
 		}
 
@@ -138,7 +138,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 				try
 				{
-					await SendMessageToSocketAsync(connectionId, serializedString);
+					await SendMessageToClientAsync(connectionId, serializedString);
 				}
 				catch (WebSocketException e)
 				{

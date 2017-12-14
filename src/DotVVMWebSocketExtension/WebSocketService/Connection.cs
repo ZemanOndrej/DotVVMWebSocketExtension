@@ -12,14 +12,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public WebSocket Socket { get; set; }
 
-
+		public bool IsConnected => Socket?.State == WebSocketState.Open;
 
 		public Connection()
 		{
-			ViewModelState=new ViewModelState();
+			ViewModelState = new ViewModelState();
 		}
-
-		public bool IsConnected => Socket?.State == WebSocketState.Open;
 
 		protected bool Equals(Connection other)
 		{
