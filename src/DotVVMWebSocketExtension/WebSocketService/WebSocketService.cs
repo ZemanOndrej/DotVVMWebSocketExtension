@@ -6,11 +6,8 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DotVVM.Framework.Runtime;
 using DotVVM.Framework.ViewModel;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Remotion.Linq.Clauses;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
@@ -46,6 +43,11 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#region Connect&Disconnect
 
+		/// <summary>
+		/// Called when connection is established and communication is available.
+		/// </summary>
+		/// <param name="socket">The socket.</param>
+		/// <returns></returns>
 		public virtual async Task OnConnected(WebSocket socket)
 		{
 			ConnectionId = WebSocketManager.AddConnection(new Connection {Socket = socket});
@@ -53,20 +55,32 @@ namespace DotVVMWebSocketExtension.WebSocketService
 				JsonConvert.SerializeObject(new {socketId = ConnectionId, action = "webSocketInit"}, Formatting.None));
 		}
 
+		/// <summary>
+		/// Called when you want to disconnect connection.
+		/// </summary>
+		/// <param name="connection">The connection.</param>
+		/// <param name="status">The status.</param>
+		/// <param name="statusString">The status string.</param>
 		public virtual void OnDisconnected(Connection connection,
 			WebSocketCloseStatus status = WebSocketCloseStatus.NormalClosure,
 			string statusString = "Closed Peacefully")
 		{
-			WebSocketManager.StopAllTasksForSocket(connection.Socket);
+			WebSocketManager.StopAllTasksForConnection(connection.Socket);
 
 			WebSocketManager.RemoveConnection(connection);
 			connection.Dispose(status, statusString);
 		}
 
+		/// <summary>
+		/// Called when socket is disconnected by client.
+		/// </summary>
+		/// <param name="socket">The socket.</param>
+		/// <param name="status">The status.</param>
+		/// <param name="statusString">The status string.</param>
 		public virtual void OnDisconnected(WebSocket socket, WebSocketCloseStatus status = WebSocketCloseStatus.NormalClosure,
 			string statusString = "Closed Peacefully")
 		{
-			WebSocketManager.StopAllTasksForSocket(socket);
+			WebSocketManager.StopAllTasksForConnection(socket);
 			WebSocketManager.RemoveConnection(socket);
 			socket.CloseAsync(status, statusString, CancellationToken.None);
 			socket.Dispose();
@@ -81,7 +95,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <param name="socket">The socket that sent ViewModel</param>
 		/// <param name="result">The result.</param>
 		/// <param name="message">The message.</param>
-		public void ReceiveViewModel(WebSocket socket, WebSocketReceiveResult result, string message)
+		internal void ReceiveViewModel(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
 			var taskId = Serializer.PopulateViewModel(WebSocketManager.GetConnetionById(ConnectionId).ViewModelState, message);
 
@@ -89,8 +103,14 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			task?.TaskCompletion.SetResult(true);
 		}
 
-		#region Send&Update ViewModel
+		#region SendStringMessage
 
+		/// <summary>
+		/// Sends the message to client asynchronous.
+		/// </summary>
+		/// <param name="socket">The socket.</param>
+		/// <param name="message">The message.</param>
+		/// <returns></returns>
 		protected async Task SendMessageToClientAsync(WebSocket socket, string message)
 		{
 			if (socket?.State == WebSocketState.Open)
@@ -106,17 +126,17 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		protected async Task SendMessageToClientAsync(string message) =>
 			await SendMessageToClientAsync(WebSocketManager.GetConnetionById(ConnectionId).Socket, message);
 
-		protected async Task SendMessageToAllAsync(string message)
-		{
-			foreach (var connection in WebSocketManager.Connections)
-			{
-				await SendMessageToClientAsync(connection.Value.Socket, message);
-			}
-		}
-
 		#endregion
 
-
+		/// <summary>
+		/// Changes the view model for connections asynchronous.
+		/// Changes ViewModels for connections specified
+		/// sends changes to connected clients
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="action">The action.</param>
+		/// <param name="connectionIdList">The connection identifier list.</param>
+		/// <returns></returns>
 		public async Task ChangeViewModelForConnectionsAsync<T>(Action<T> action, List<string> connectionIdList)
 			where T : DotvvmViewModelBase
 		{
@@ -142,6 +162,13 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			}
 		}
 
+		/// <summary>
+		/// Changes the view model for current connection.
+		/// When in task you can change ViewModel on current client and send changes to it
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="action">The action.</param>
+		/// <returns></returns>
 		public async Task ChangeViewModelForCurrentConnection<T>(Action<T> action) where T : DotvvmViewModelBase
 		{
 			var connection = WebSocketManager.GetConnetionById(ConnectionId);
@@ -168,6 +195,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#region TaskManagement
 
+		/// <summary>
+		/// Creates the task that will be invoked after request is processed in filter.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="func">The function.</param>
+		/// <returns></returns>
 		public string CreateTask<T>(Func<T, CancellationToken, string, Task> func) where T : WebSocketService
 		{
 			var tokenSource = new CancellationTokenSource();
@@ -190,13 +223,22 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			return taskId;
 		}
 
+
+		/// <summary>
+		/// Stops the task with id for current connection.
+		/// </summary>
+		/// <param name="taskId">The task identifier.</param>
 		public void StopTask(string taskId)
 		{
-			WebSocketManager.StopTaskWithId(taskId, ConnectionId);
+			WebSocketManager.StopTaskWithId(taskId);
 		}
 
 		#endregion
 
+		/// <summary>
+		/// Saves the state of the current ViewModel.
+		/// Should be called in PreRender method in ViewModel
+		/// </summary>
 		public void SaveCurrentState()
 		{
 			if (ConnectionId == null) return;
@@ -209,6 +251,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			connection.ViewModelState.LastSentViewModelJson = connection.ViewModelState.ChangedViewModelJson;
 		}
 
+		/// <summary>
+		/// Sends the synchronize request to client.
+		/// Used in task to update the state of current ViewModel stored on server
+		/// </summary>
+		/// <param name="taskId">The task identifier.</param>
+		/// <returns></returns>
 		public async Task SendSyncRequestToClient(string taskId)
 		{
 			await SendMessageToClientAsync(

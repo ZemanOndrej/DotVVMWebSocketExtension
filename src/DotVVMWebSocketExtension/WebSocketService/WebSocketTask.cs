@@ -4,10 +4,14 @@ using System.Threading.Tasks;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
+	/// <summary>
+	/// Stores values for Task management
+	/// </summary>
 	public class WebSocketTask
 	{
-
 		public string TaskId { get; set; }
+
+		public Task Task { get; set; }
 
 		public CancellationTokenSource CancellationTokenSource { get; set; }
 
@@ -16,8 +20,5 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public TaskCompletionSource<bool> TaskCompletion { get; set; }
 
 		public Func<Task> FunctionToInvoke { get; set; }
-
-		public Task Task { get; set; }
-
 	}
 }

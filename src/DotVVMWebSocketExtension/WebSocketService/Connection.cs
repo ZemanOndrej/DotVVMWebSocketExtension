@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Net.WebSockets;
 using System.Threading;
-using DotVVM.Framework.Hosting;
-using Newtonsoft.Json.Linq;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
+
+	/// <summary>
+	/// Stores WebSocket object and state of the connection
+	/// </summary>
+	/// <seealso cref="System.IDisposable" />
 	public class Connection : IDisposable
 	{
 		public ViewModelState ViewModelState { get; set; }

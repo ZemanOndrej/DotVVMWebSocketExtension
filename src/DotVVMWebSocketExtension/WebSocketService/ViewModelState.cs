@@ -1,8 +1,12 @@
 ﻿using Newtonsoft.Json.Linq;
 
+
 namespace DotVVMWebSocketExtension.WebSocketService
 {
-    public class ViewModelState
+	/// <summary>
+	/// Stores ViewModel state 
+	/// </summary>
+	public class ViewModelState
     {
 	    public JObject LastSentViewModelJson { get; set; }
 

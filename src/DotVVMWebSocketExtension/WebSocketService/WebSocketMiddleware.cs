@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
+	/// <summary>
+	/// WebSocket Middleware class that handles websocket connection
+	/// </summary>
 	public class WebSocketMiddleware
 	{
 		private readonly RequestDelegate _next;
@@ -19,6 +22,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			Service = service;
 		}
 
+		/// <summary>
+		/// Invoked after previous middleware called it.
+		/// Accepts WebSocket connection and calls OnConnected after connection is established
+		/// </summary>
+		/// <param name="context">The context.</param>
+		/// <returns></returns>
 		public async Task Invoke(HttpContext context)
 		{
 			if (!context.WebSockets.IsWebSocketRequest)
@@ -33,6 +42,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			await _next(context);
 		}
 
+
+		/// <summary>
+		/// Handles the web socket communication until conenction is open.
+		/// </summary>
+		/// <param name="socket">The socket.</param>
+		/// <returns></returns>
 		private async Task HandleWebSocketCommunication(WebSocket socket)
 		{
 			var buffer = new ArraySegment<byte>(new byte[4 * 1024]);

@@ -86,7 +86,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		}
 
 		/// <summary>
-		/// Removes the socket from list and closes connection normally
+		/// Removes the socket from list and closes connectionId normally
 		/// </summary>
 		/// <param name="connectionId">The socket identifier.</param>
 		/// <returns></returns>
@@ -111,13 +111,10 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		#region TaskManagement
 
 		/// <summary>
-		/// Adds the task to the list with websocket id and cancellation token
+		/// Adds the task to the list with connectionId id and cancellation token
 		/// </summary>
 		/// <param name="connectionId">The socket identifier.</param>
 		/// <param name="token">The token.</param>
-		/// <param name="methodToInvoke"></param>
-		/// <param name="task">The task.</param>
-		/// <param name="context">LastSentViewModelJson of HTTP request</param>
 		public string AddTask(string connectionId, CancellationTokenSource token)
 		{
 			var taskId = Guid.NewGuid().ToString();
@@ -152,27 +149,29 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			return taskId;
 		}
 
-		public void StopTaskWithId(string taskId, string socketId)
-		{
-			TaskList.TryGetValue(socketId, out var set);
-			if (set == null)
-			{
-				return;
-			}
-			var task = set.First(t => t.TaskId == taskId);
 
-			task.CancellationTokenSource.Cancel();
-			set.Remove(task);
+		/// <summary>
+		/// Stops the task with identifier.
+		/// </summary>
+		/// <param name="taskId">The task identifier.</param>
+		public void StopTaskWithId(string taskId)
+		{
+			var task = TaskList.SelectMany(s => s.Value).FirstOrDefault(t => t.TaskId == taskId);
+			task?.CancellationTokenSource.Cancel();
 		}
 
-		public void StopAllTasksForSocket(string socketId)
+		/// <summary>
+		/// Stops all tasks for connection.
+		/// </summary>
+		/// <param name="connectionId">The socket identifier.</param>
+		public void StopAllTasksForConnection(string connectionId)
 		{
-			TaskList.TryGetValue(socketId, out var set);
+			TaskList.TryGetValue(connectionId, out var set);
 			set?.ToList().ForEach(s => s.CancellationTokenSource.Cancel());
 			set?.Clear();
 		}
 
-		public void StopAllTasksForSocket(WebSocket socket) => StopAllTasksForSocket(GetConnectionId(socket));
+		public void StopAllTasksForConnection(WebSocket socket) => StopAllTasksForConnection(GetConnectionId(socket));
 
 		#endregion
 	}
