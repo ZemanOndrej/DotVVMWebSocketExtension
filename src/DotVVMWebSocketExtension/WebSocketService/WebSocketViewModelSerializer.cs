@@ -56,7 +56,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 			var result = new JObject();
 			result["viewModel"] = writer.Token;
-			result["action"] = "successfulCommand";
+			result["action"] = WebSocketRequestType.SuccessfulCommand;
 			state.ChangedViewModelJson = result;
 		}
 

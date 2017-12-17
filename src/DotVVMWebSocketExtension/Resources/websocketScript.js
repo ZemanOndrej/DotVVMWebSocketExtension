@@ -1,48 +1,52 @@
 ﻿var initWs = function() {
+	const messageEnum = {
+		Init: "webSocketInit",
+		Sync: "viewModelSynchronizationRequest",
+		Change: "successfulCommand",
+		Ping: "ping"
+	}
+
 	var viewModelName = "root";
-	var uri = "ws://" + window.location.host + dotvvm.viewModelObservables[viewModelName]().Service().Path();
-	var wsCount = 0;
+	var uri = `ws://${window.location.host}${dotvvm.viewModelObservables[viewModelName]().Service().Path()}`;
+	var autoReconnectInterval = 5 * 1000;
 
 	function connect() {
 		var socket = new WebSocket(uri);
 		dotvvm.websocket = socket;
 
-		socket.onopen = function(event) {
-			console.log("opened connection to " + uri + "; ");
-		};
-		socket.onclose = function(event) {
-			console.log("closed connection from " + uri, event);
+//		socket.onopen = function(event) {
+//			console.log("opened connection to " + uri + "; ");
+//		};
+		socket.onclose = function (event) {
+			console.log(`WebSocketClient: retry in ${autoReconnectInterval}ms`, event);
+			setTimeout(function () {
+				console.log("WebSocketClient: reconnecting...");
+				connect();
+			}, autoReconnectInterval);
+			console.error(`closed connection from ${uri}`, event);
 		};
 		socket.onmessage = function(event) {
-			console.log("onmessage", event.data);
-			wsCount++;
-			console.log(wsCount);
-
 			var resultObject = JSON.parse(event.data);
+//			console.log("onmessage", resultObject);
 			switch (resultObject.action) {
-			case "webSocketInit":
-				console.log(resultObject.type);
+			case messageEnum.Init:
 				dotvvm.viewModelObservables[viewModelName]().Service().ConnectionId(resultObject.socketId);
 				break;
-			case "successfulCommand":
+			case messageEnum.Change:
+
 				updateViewModel(resultObject);
 				break;
-			case "viewModelSynchronizationRequest":
+			case messageEnum.Sync:
 
 				var viewModel = dotvvm.viewModels[viewModelName].viewModel;
 				var data = {
 					viewModel: dotvvm.serialization.serialize(viewModel,
-						{ pathMatcher: function (val) { return context && val === context.$data; } }),
-					taskId : resultObject.taskId
+						{ pathMatcher: function(val) { return context && val === context.$data; } }),
+					taskId: resultObject.taskId
 				};
 				socket.send(ko.toJSON(data));
 				break;
-			case "pong":
-				console.log("pong message");
-
 			};
-
-
 		};
 
 		window.onbeforeunload = function() {
@@ -50,14 +54,9 @@
 			};
 			socket.close();
 		};
-
 	}
 
 	function updateViewModel(resultObject) {
-		if (!resultObject.viewModel && !resultObject.viewModelDiff) {
-			console.log(resultObject);
-			return;
-		}
 
 		if (!resultObject.viewModel && resultObject.viewModelDiff) {
 			resultObject.viewModel = dotvvm.patch(dotvvm.serialization.serialize(dotvvm.viewModels[viewModelName].viewModel),
@@ -87,6 +86,14 @@
 			dotvvm.handleRedirect(resultObject, viewModelName);
 		}
 
+	}
+
+	function reconnect(e) {
+		console.log(`WebSocketClient: retry in ${autoReconnectInterval}ms`, e);
+		setTimeout(function () {
+			console.log("WebSocketClient: reconnecting...");
+			connect();
+		}, autoReconnectInterval);
 	}
 
 	connect();

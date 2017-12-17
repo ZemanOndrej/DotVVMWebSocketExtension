@@ -52,7 +52,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		{
 			ConnectionId = WebSocketManager.AddConnection(new Connection {Socket = socket});
 			await SendMessageToClientAsync(socket,
-				JsonConvert.SerializeObject(new {socketId = ConnectionId, action = "webSocketInit"}, Formatting.None));
+				JsonConvert.SerializeObject(new {socketId = ConnectionId, action = WebSocketRequestType.WebSocketInit}, Formatting.None));
 		}
 
 		/// <summary>
@@ -260,7 +260,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public async Task SendSyncRequestToClient(string taskId)
 		{
 			await SendMessageToClientAsync(
-				JsonConvert.SerializeObject(new {action = "viewModelSynchronizationRequest", taskId}, Formatting.None));
+				JsonConvert.SerializeObject(new {action = WebSocketRequestType.WebSocketViewModelSync, taskId}, Formatting.None));
 
 			var task = WebSocketManager.TaskList.SelectMany(s => s.Value).FirstOrDefault(s => s.TaskId == taskId);
 			if (task != null)

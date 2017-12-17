@@ -1,7 +1,10 @@
 ﻿namespace DotVVMWebSocketExtension.WebSocketService
 {
-	public enum WebSocketRequestType
+	public static class WebSocketRequestType
 	{
-		WsInit,WsViewModelSync,SuccessfulCommand
+		public static string WebSocketInit => "webSocketInit";
+		public static string WebSocketViewModelSync => "viewModelSynchronizationRequest";
+		public static string SuccessfulCommand => "successfulCommand";
+		public static string Ping => "ping";
 	}
 }
