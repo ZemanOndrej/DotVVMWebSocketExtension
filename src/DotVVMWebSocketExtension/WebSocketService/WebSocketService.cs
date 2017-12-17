@@ -1,6 +1,7 @@
 ﻿using DotVVM.Framework.Hosting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -13,7 +14,7 @@ using Remotion.Linq.Clauses;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
-	public class WebSocketService
+	public partial class WebSocketService
 	{
 		#region Properties&Constructor
 
@@ -21,11 +22,16 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		protected readonly IDotvvmRequestContext Context;
 		protected readonly WebSocketViewModelSerializer Serializer;
 
+
 		public string ConnectionId { get; set; }
 		public string Path { get; set; }
 
-//		private SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-
+		/// <summary>
+		/// Initializes a new instance of the <see cref="WebSocketService"/> class.
+		/// </summary>
+		/// <param name="webSocketManager">The web socket manager.</param>
+		/// <param name="serializer">The serializer.</param>
+		/// <param name="context">The request context.</param>
 		public WebSocketService(WebSocketManager webSocketManager, WebSocketViewModelSerializer serializer,
 			IDotvvmRequestContext context)
 		{
@@ -68,10 +74,19 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#endregion
 
+
+		/// <summary>
+		/// Receives the ViewModel and updates stored ViewModel.
+		/// </summary>
+		/// <param name="socket">The socket that sent ViewModel</param>
+		/// <param name="result">The result.</param>
+		/// <param name="message">The message.</param>
 		public void ReceiveViewModel(WebSocket socket, WebSocketReceiveResult result, string message)
 		{
-			Serializer.PopulateViewModel(WebSocketManager.GetConnetionById(ConnectionId).ViewModelState, message);
-//			signal.Release();
+			var taskId = Serializer.PopulateViewModel(WebSocketManager.GetConnetionById(ConnectionId).ViewModelState, message);
+
+			var task = WebSocketManager.TaskList.SelectMany(s => s.Value).FirstOrDefault(s => s.TaskId == taskId);
+			task?.TaskCompletion.SetResult(true);
 		}
 
 		#region Send&Update ViewModel
@@ -153,27 +168,34 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		#region TaskManagement
 
-		public string CreateAndRunTask<T>(Func<T, CancellationToken, Task> func) where T : WebSocketService
+		public string CreateTask<T>(Func<T, CancellationToken, string, Task> func) where T : WebSocketService
 		{
 			var tokenSource = new CancellationTokenSource();
 			var connection = WebSocketManager.GetConnetionById(ConnectionId);
 
 			connection.ViewModelState.LastSentViewModel = Context.ViewModel;
 
-			return WebSocketManager.AddTask(
-				func.Invoke((T) this, tokenSource.Token),
-//					.ContinueWith(s => StopTask(), tokenSource.Token),
+			var taskId = WebSocketManager.AddTask(
 				ConnectionId,
-				tokenSource);
+				tokenSource
+			);
+
+			var task = WebSocketManager.TaskList.SelectMany(v => v.Value).FirstOrDefault(t => t.TaskId == taskId);
+			if (task != null)
+			{
+				task.FunctionToInvoke = () =>
+					func.Invoke((T) this, tokenSource.Token, taskId).ContinueWith(s => StopTask(taskId), tokenSource.Token);
+			}
+
+			return taskId;
 		}
 
-		public void StopTask()
+		public void StopTask(string taskId)
 		{
-			WebSocketManager.StopAllTasksForSocket(ConnectionId);
+			WebSocketManager.StopTaskWithId(taskId, ConnectionId);
 		}
 
 		#endregion
-
 
 		public void SaveCurrentState()
 		{
@@ -187,12 +209,16 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			connection.ViewModelState.LastSentViewModelJson = connection.ViewModelState.ChangedViewModelJson;
 		}
 
-		public async Task SendSyncReqeustToClient()
+		public async Task SendSyncRequestToClient(string taskId)
 		{
 			await SendMessageToClientAsync(
-				JsonConvert.SerializeObject(new {action = "viewModelSynchronizationRequest"}, Formatting.None));
+				JsonConvert.SerializeObject(new {action = "viewModelSynchronizationRequest", taskId}, Formatting.None));
 
-//			await signal.WaitAsync();
+			var task = WebSocketManager.TaskList.SelectMany(s => s.Value).FirstOrDefault(s => s.TaskId == taskId);
+			if (task != null)
+			{
+				await task.TaskCompletion.Task;
+			}
 		}
 	}
 }

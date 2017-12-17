@@ -13,9 +13,6 @@
 
 	</div>
 	
-
-
-
 	<div class="{value: !IsLoggedIn ? 'hidden':'nothidden'}">
 
 
@@ -52,9 +49,11 @@
 			<dot:Button Click="{command: SendMessage()}" id="submitmsg">Send</dot:Button>
 
 		</div>
+
+
 	</div>
 	
-			<dot:RequiredResource Name="websocketScript" />
+	<dot:RequiredResource Name="websocketScript" />
 </dot:Content>
 
 

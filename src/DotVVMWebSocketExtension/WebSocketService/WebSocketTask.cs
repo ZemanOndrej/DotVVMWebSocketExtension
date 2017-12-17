@@ -1,17 +1,11 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using DotVVM.Framework.Hosting;
-using Newtonsoft.Json.Linq;
 
 namespace DotVVMWebSocketExtension.WebSocketService
 {
 	public class WebSocketTask
 	{
-
-		public Task Task { get; set; }
 
 		public string TaskId { get; set; }
 
@@ -19,6 +13,11 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public string ConnectionId { get; set; }
 
+		public TaskCompletionSource<bool> TaskCompletion { get; set; }
+
+		public Func<Task> FunctionToInvoke { get; set; }
+
+		public Task Task { get; set; }
 
 	}
 }

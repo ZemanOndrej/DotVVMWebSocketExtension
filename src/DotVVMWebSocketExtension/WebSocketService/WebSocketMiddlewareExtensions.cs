@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using DotVVM.Framework.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -14,9 +15,11 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <returns></returns>
 		public static IServiceCollection AddWebSocketManagerService(this IServiceCollection services)
 		{
+			
 			services.TryAddSingleton<WebSocketManager>();
 			services.TryAddSingleton<WebSocketViewModelSerializer>();
 			services.TryAddScoped<WebSocketService>();
+			services.AddWebSocketFilter();
 			foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
 			{
 				if (type.GetTypeInfo().BaseType == typeof(WebSocketService))
@@ -24,6 +27,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 					services.AddScoped(type);
 				}
 			}
+			
 			return services;
 		}
 
@@ -45,8 +49,14 @@ namespace DotVVMWebSocketExtension.WebSocketService
 				return app.Map(path, a => a.UseMiddleware<WebSocketMiddleware>());
 			}
 			mgr.WebSocketPaths.TryAdd(service.GetType(), path);
-
 			return app.Map(path, a => a.UseMiddleware<WebSocketMiddleware>(service));
+		}
+
+		public static IServiceCollection AddWebSocketFilter(this IServiceCollection services)
+		{
+			services.Configure<DotvvmConfiguration>(c =>
+				c.Runtime.GlobalFilters.Add(new WebSocketService.WebSocketActionFilter()));
+			return services;
 		}
 	}
 }

@@ -11,7 +11,7 @@
 			console.log("opened connection to " + uri + "; ");
 		};
 		socket.onclose = function(event) {
-			console.log("closed connection from " + uri,event);
+			console.log("closed connection from " + uri, event);
 		};
 		socket.onmessage = function(event) {
 			console.log("onmessage", event.data);
@@ -32,9 +32,9 @@
 				var viewModel = dotvvm.viewModels[viewModelName].viewModel;
 				var data = {
 					viewModel: dotvvm.serialization.serialize(viewModel,
-						{ pathMatcher: function(val) { return context && val === context.$data; } }),
+						{ pathMatcher: function (val) { return context && val === context.$data; } }),
+					taskId : resultObject.taskId
 				};
-
 				socket.send(ko.toJSON(data));
 				break;
 			case "pong":
@@ -60,7 +60,8 @@
 		}
 
 		if (!resultObject.viewModel && resultObject.viewModelDiff) {
-			resultObject.viewModel = dotvvm.patch(dotvvm.serialization.serialize(dotvvm.viewModels[viewModelName].viewModel), resultObject.viewModelDiff);
+			resultObject.viewModel = dotvvm.patch(dotvvm.serialization.serialize(dotvvm.viewModels[viewModelName].viewModel),
+				resultObject.viewModelDiff);
 		}
 
 

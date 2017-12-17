@@ -90,7 +90,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			return state.ChangedViewModelJson.ToString(JsonFormatting);
 		}
 
-		public void PopulateViewModel(ViewModelState state, string serializedPostData)
+		public string PopulateViewModel(ViewModelState state, string serializedPostData)
 		{
 
 			// get properties
@@ -122,6 +122,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			{
 				throw new Exception($"Could not deserialize viewModel of type { state.LastSentViewModel.GetType().Name }. {GeneralViewModelRecommendations}", ex);
 			}
+			return (string) data["taskId"];
 		}
 	}
 }

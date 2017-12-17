@@ -114,10 +114,11 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// Adds the task to the list with websocket id and cancellation token
 		/// </summary>
 		/// <param name="connectionId">The socket identifier.</param>
-		/// <param name="task">The task.</param>
 		/// <param name="token">The token.</param>
+		/// <param name="methodToInvoke"></param>
+		/// <param name="task">The task.</param>
 		/// <param name="context">LastSentViewModelJson of HTTP request</param>
-		public string AddTask(Task task, string connectionId, CancellationTokenSource token)
+		public string AddTask(string connectionId, CancellationTokenSource token)
 		{
 			var taskId = Guid.NewGuid().ToString();
 			if (TaskList.ContainsKey(connectionId))
@@ -127,9 +128,9 @@ namespace DotVVMWebSocketExtension.WebSocketService
 					set.Add(new WebSocketTask
 					{
 						CancellationTokenSource = token,
-						Task = task,
 						TaskId = taskId,
-						ConnectionId = connectionId
+						ConnectionId = connectionId,
+						TaskCompletion = new TaskCompletionSource<bool>()
 					});
 				}
 			}
@@ -141,10 +142,11 @@ namespace DotVVMWebSocketExtension.WebSocketService
 						new WebSocketTask
 						{
 							CancellationTokenSource = token,
-							Task = task,
 							TaskId = taskId,
-							ConnectionId = connectionId
+							ConnectionId = connectionId,
+							TaskCompletion = new TaskCompletionSource<bool>()
 						}
+
 					});
 			}
 			return taskId;

@@ -27,10 +27,10 @@ namespace SampleApp.ViewModels
 			IsPercentageVisible = true;
 			Percentage = 0;
 			Text = "Action is starting";
-			Service.CreateAndRunTask<WebSocketService>(LongTaskAsync);
+			Service.CreateTask<WebSocketService>(LongTaskAsync);
 		}
 
-		public async Task LongTaskAsync(WebSocketService webSocketService, CancellationToken cancellationToken)
+		public async Task LongTaskAsync(WebSocketService webSocketService, CancellationToken cancellationToken, string taskId)
 		{
 			for (int i = 1; i < 500; ++i)
 			{
@@ -38,7 +38,7 @@ namespace SampleApp.ViewModels
 				cancellationToken.ThrowIfCancellationRequested();
 				if (i == 50)
 				{
-					await Service.SendSyncReqeustToClient();
+					await Service.SendSyncRequestToClient(taskId);
 				}
 
 				Console.WriteLine(((ServerEventsViewModel) Context.ViewModel).Text2);
@@ -58,10 +58,10 @@ namespace SampleApp.ViewModels
 			});
 		}
 
-		public void StopTask()
-		{
-			Service.StopTask();
-		}
+//		public void StopTask(string taskId)
+//		{
+//			Service.StopTask(taskId);
+//		}
 
 
 		public override Task PreRender()
