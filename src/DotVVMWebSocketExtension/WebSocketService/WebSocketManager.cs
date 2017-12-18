@@ -45,7 +45,16 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <returns></returns>
 		public Connection GetConnetionById(string id)
 		{
+			if (string.IsNullOrEmpty(id))
+			{
+				throw new ArgumentNullException(nameof(id));
+			}
+
 			Connections.TryGetValue(id, out var connection);
+			if (connection == null)
+			{
+				throw new InvalidOperationException("connection is not in dictionary");
+			}
 			return connection;
 		}
 
@@ -56,7 +65,14 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <returns></returns>
 		public string GetConnectionId(WebSocket socket) => Connections.FirstOrDefault(p => p.Value.Socket == socket).Key;
 
-		public string GetConnectionId(Connection connection) => GetConnectionId(connection.Socket);
+		public string GetConnectionId(Connection connection)
+		{
+			if (connection == null)
+			{
+				throw new ArgumentNullException(nameof(connection));
+			}
+			return GetConnectionId(connection.Socket);
+		}
 
 		/// <summary>
 		/// Creates new GUID and calls AddConnection() with that GUID as string
@@ -92,8 +108,13 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <returns></returns>
 		public void RemoveConnection(string connectionId)
 		{
+			if (string.IsNullOrEmpty(connectionId))
+			{
+				throw new ArgumentNullException(nameof(connectionId));
+			}
+			RemoveAllTasksForConnection(connectionId);
 			Connections.TryRemove(connectionId, out var connection);
-
+			TaskList.TryRemove(connectionId, out var _);
 			connection.Dispose();
 		}
 
@@ -117,6 +138,10 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <param name="token">The token.</param>
 		public string AddTask(string connectionId, CancellationTokenSource token)
 		{
+			if (string.IsNullOrEmpty(connectionId)|| token==null)
+			{
+				throw new ArgumentNullException(nameof(connectionId)+" or "+nameof(token));
+			}
 			var taskId = Guid.NewGuid().ToString();
 			if (TaskList.ContainsKey(connectionId))
 			{
@@ -149,29 +174,39 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			return taskId;
 		}
 
-
 		/// <summary>
-		/// Stops the task with identifier.
+		/// Stops and removes the task with identifier.
 		/// </summary>
 		/// <param name="taskId">The task identifier.</param>
-		public void StopTaskWithId(string taskId)
+		public void RemoveTaskWithId(string taskId)
 		{
+			if (string.IsNullOrEmpty(taskId))
+			{
+				throw new ArgumentNullException(nameof(taskId));
+			}
 			var task = TaskList.SelectMany(s => s.Value).FirstOrDefault(t => t.TaskId == taskId);
-			task?.CancellationTokenSource.Cancel();
+			if (task ==null)
+			{
+				throw new NullReferenceException(nameof(task));
+			}
+			TaskList[task.ConnectionId].Remove(task);
+			task.CancellationTokenSource.Cancel();
 		}
 
 		/// <summary>
-		/// Stops all tasks for connection.
+		/// Stops and removes all tasks for connection.
 		/// </summary>
 		/// <param name="connectionId">The socket identifier.</param>
-		public void StopAllTasksForConnection(string connectionId)
+		public void RemoveAllTasksForConnection(string connectionId)
 		{
 			TaskList.TryGetValue(connectionId, out var set);
-			set?.ToList().ForEach(s => s.CancellationTokenSource.Cancel());
-			set?.Clear();
+			if (set == null)
+			{
+				return;
+			}
+			set.ToList().ForEach(s => s.CancellationTokenSource.Cancel());
+			set.Clear();
 		}
-
-		public void StopAllTasksForConnection(WebSocket socket) => StopAllTasksForConnection(GetConnectionId(socket));
 
 		#endregion
 	}

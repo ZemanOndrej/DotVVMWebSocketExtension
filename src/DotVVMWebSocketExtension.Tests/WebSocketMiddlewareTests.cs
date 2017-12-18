@@ -8,17 +8,18 @@ using DotVVMWebSocketExtension.WebSocketService;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using Xunit;
+using WebSocketManager = DotVVMWebSocketExtension.WebSocketService.WebSocketManager;
 
 namespace DotVVMWebSocketExtension.Tests
 {
 	public class WebSocketMiddlewareTests
 	{
-		private readonly Mock<WebSocketManager> wsm;
+		private readonly Mock<Microsoft.AspNetCore.Http.WebSocketManager> wsm;
 		private readonly Mock<WebSocket> websocket;
 		private readonly Mock<HttpContext> contextMock;
 		private readonly Mock<DotvvmRequestContext> dotvvmContextMock;
 		private readonly Mock<WebSocketViewModelSerializer> serializer;
-		private readonly Mock<WebSocketFacade> hubMock;
+		private readonly Mock<WebSocketService.WebSocketService> hubMock;
 		private readonly Mock<HttpRequest> requestMock;
 
 		public WebSocketMiddlewareTests()
@@ -26,18 +27,16 @@ namespace DotVVMWebSocketExtension.Tests
 			contextMock = new Mock<HttpContext>();
 			dotvvmContextMock = new Mock<DotvvmRequestContext>();
 			serializer = new Mock<WebSocketViewModelSerializer>(new Mock<IViewModelSerializationMapper>().Object);
-			hubMock = new Mock<WebSocketFacade>(new Mock<WebSocketManagerService>().Object, serializer.Object,
+			hubMock = new Mock<WebSocketService.WebSocketService>(new Mock<WebSocketManager>().Object, serializer.Object,
 				dotvvmContextMock.Object);
 			requestMock = new Mock<HttpRequest>();
-			wsm = new Mock<WebSocketManager>();
+			wsm = new Mock<Microsoft.AspNetCore.Http.WebSocketManager>();
 			websocket = new Mock<WebSocket>();
-
 		}
 
 		[Fact]
 		public async Task NotAWebsocketRequestTest()
 		{
-
 			hubMock.Setup(s => s.OnConnected(new Mock<WebSocket>().Object)).Throws(new Exception("should not have been called"));
 			contextMock.Setup(x => x.Request).Returns(requestMock.Object);
 			contextMock.SetupGet(p => p.WebSockets).Returns(wsm.Object);
@@ -50,7 +49,7 @@ namespace DotVVMWebSocketExtension.Tests
 		}
 
 		[Fact]
-		public async Task WebSocketClogingTest()
+		public async Task WebSocketClosingTest()
 		{
 			contextMock.SetupGet(p => p.WebSockets).Returns(wsm.Object);
 			contextMock.Setup(x => x.Request).Returns(requestMock.Object);
@@ -68,7 +67,7 @@ namespace DotVVMWebSocketExtension.Tests
 			await Task.Delay(100);
 			hubMock.Verify(m => m.OnConnected(websocket.Object));
 			wsm.Verify(m => m.AcceptWebSocketAsync());
-			hubMock.Verify(m => m.OnDisconnected(websocket.Object));
+			hubMock.Verify(m => m.OnDisconnected(websocket.Object, WebSocketCloseStatus.NormalClosure,"Closed Peacefully"));
 		}
 
 		[Fact]
@@ -92,7 +91,6 @@ namespace DotVVMWebSocketExtension.Tests
 			await Task.Delay(500);
 			hubMock.Verify(m => m.OnConnected(websocket.Object));
 			wsm.Verify(m => m.AcceptWebSocketAsync());
-			hubMock.Verify(h => h.ReceiveMessageAsync(websocket.Object, result.Object, ""));
 		}
 	}
 }

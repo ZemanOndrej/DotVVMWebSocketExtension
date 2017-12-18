@@ -38,12 +38,10 @@ namespace SampleApp.ViewModels
 				cancellationToken.ThrowIfCancellationRequested();
 				if (i == 50)
 				{
-					await Service.SendSyncRequestToClient(taskId);
+					await webSocketService.SendSyncRequestToClient(taskId);
 				}
 
-				Console.WriteLine(((ServerEventsViewModel) Context.ViewModel).Text2);
-
-				await webSocketService.ChangeViewModelForCurrentConnection((ServerEventsViewModel changes) =>
+				await webSocketService.ChangeViewModelForCurrentConnectionAsync((ServerEventsViewModel changes) =>
 				{
 					changes.Percentage = i;
 				});
@@ -51,17 +49,12 @@ namespace SampleApp.ViewModels
 			}
 
 
-			await webSocketService.ChangeViewModelForCurrentConnection((ServerEventsViewModel changes) =>
+			await webSocketService.ChangeViewModelForCurrentConnectionAsync((ServerEventsViewModel changes) =>
 			{
 				changes.Text = "Task is Complete";
 				changes.IsPercentageVisible = false;
 			});
 		}
-
-//		public void StopTask(string taskId)
-//		{
-//			Service.StopTask(taskId);
-//		}
 
 
 		public override Task PreRender()

@@ -19,7 +19,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 
 		public Formatting JsonFormatting { get; set; }
 
-
 		public WebSocketViewModelSerializer(IViewModelSerializationMapper mapper)
 		{
 			Mapper = mapper;
@@ -31,7 +30,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// </summary>
 		/// <param name="state">The state.</param>
 		/// <exception cref="Exception"></exception>
-		public void BuildViewModel(ViewModelState state)
+		public virtual void BuildViewModel(ViewModelState state)
 		{
 			var jsonSerializer = CreateJsonSerializer();
 			var viewModelConverter = new ViewModelJsonConverter(true, Mapper)
@@ -82,21 +81,22 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// </summary>
 		/// <param name="state">The state.</param>
 		/// <returns></returns>
-		public string SerializeViewModel(ViewModelState state)
+		public virtual string SerializeViewModel(ViewModelState state)
 		{
-			if (state.LastSentViewModelJson != null && state.ChangedViewModelJson["viewModel"] != null)
+			if (state.LastSentViewModelJson == null || state.ChangedViewModelJson["viewModel"] == null)
 			{
-				state.ChangedViewModelJson?.Remove("viewModelDiff");
-
-				state.ChangedViewModelJson["viewModelDiff"] = JsonUtils.Diff(
-					(JObject) state.LastSentViewModelJson["viewModel"],
-					(JObject) state.ChangedViewModelJson["viewModel"], true);
-
-
-				state.LastSentViewModelJson["viewModel"] = (JObject) state.ChangedViewModelJson["viewModel"].DeepClone();
-
-				state.ChangedViewModelJson.Remove("viewModel");
+				return state.ChangedViewModelJson.ToString(JsonFormatting);
 			}
+			state.ChangedViewModelJson?.Remove("viewModelDiff");
+
+			state.ChangedViewModelJson["viewModelDiff"] = JsonUtils.Diff(
+				(JObject) state.LastSentViewModelJson["viewModel"],
+				(JObject) state.ChangedViewModelJson["viewModel"], true);
+
+
+			state.LastSentViewModelJson["viewModel"] = (JObject) state.ChangedViewModelJson["viewModel"].DeepClone();
+
+			state.ChangedViewModelJson.Remove("viewModel");
 			return state.ChangedViewModelJson.ToString(JsonFormatting);
 		}
 
@@ -107,18 +107,15 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <param name="serializedPostData">The serialized post data.</param>
 		/// <returns></returns>
 		/// <exception cref="Exception"></exception>
-		public string PopulateViewModel(ViewModelState state, string serializedPostData)
+		public virtual string PopulateViewModel(ViewModelState state, string serializedPostData)
 		{
-			// get properties
 			var data = state.LastSentViewModelJson = JObject.Parse(serializedPostData);
 			var viewModelToken = (JObject) data["viewModel"];
 
-			// load CSRF token
 			state.CsrfToken = viewModelToken["$csrfToken"].Value<string>();
 
 			var viewModelConverter = new ViewModelJsonConverter(true, Mapper);
 
-			// populate the ViewModel
 			var serializer = CreateJsonSerializer();
 			serializer.Converters.Add(viewModelConverter);
 			try

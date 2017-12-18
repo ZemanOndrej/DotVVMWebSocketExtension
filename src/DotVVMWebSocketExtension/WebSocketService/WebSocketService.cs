@@ -50,9 +50,14 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <returns></returns>
 		public virtual async Task OnConnected(WebSocket socket)
 		{
+			if (socket == null)
+			{
+				throw new NullReferenceException("socket is null");
+			}
 			ConnectionId = WebSocketManager.AddConnection(new Connection {Socket = socket});
 			await SendMessageToClientAsync(socket,
-				JsonConvert.SerializeObject(new {socketId = ConnectionId, action = WebSocketRequestType.WebSocketInit}, Formatting.None));
+				JsonConvert.SerializeObject(new {socketId = ConnectionId, action = WebSocketRequestType.WebSocketInit},
+					Formatting.None));
 		}
 
 		/// <summary>
@@ -65,7 +70,10 @@ namespace DotVVMWebSocketExtension.WebSocketService
 			WebSocketCloseStatus status = WebSocketCloseStatus.NormalClosure,
 			string statusString = "Closed Peacefully")
 		{
-			WebSocketManager.StopAllTasksForConnection(connection.Socket);
+			if (connection?.Socket == null)
+			{
+				throw new NullReferenceException("connection or connection socket are null");
+			}
 
 			WebSocketManager.RemoveConnection(connection);
 			connection.Dispose(status, statusString);
@@ -80,7 +88,6 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public virtual void OnDisconnected(WebSocket socket, WebSocketCloseStatus status = WebSocketCloseStatus.NormalClosure,
 			string statusString = "Closed Peacefully")
 		{
-			WebSocketManager.StopAllTasksForConnection(socket);
 			WebSocketManager.RemoveConnection(socket);
 			socket.CloseAsync(status, statusString, CancellationToken.None);
 			socket.Dispose();
@@ -140,11 +147,24 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		public async Task ChangeViewModelForConnectionsAsync<T>(Action<T> action, List<string> connectionIdList)
 			where T : DotvvmViewModelBase
 		{
+			if (action == null || connectionIdList==null)
+			{
+				throw new ArgumentNullException(nameof(action));
+			}
+			if (ConnectionId == null)
+			{
+				throw new NullReferenceException(nameof(ConnectionId));
+			}
 			foreach (var connectionId in connectionIdList)
 			{
+				if (string.IsNullOrEmpty(connectionId))
+				{
+					throw new ArgumentNullException(nameof(connectionIdList)+" contains null");
+				}
 				if (ConnectionId == connectionId) continue;
+
 				var connection = WebSocketManager.GetConnetionById(connectionId);
-				if (connection == null) continue;
+				if (connection == null) throw new NullReferenceException(nameof(connection));
 				action.Invoke((T) connection.ViewModelState.LastSentViewModel);
 				Serializer.BuildViewModel(connection.ViewModelState);
 
@@ -169,8 +189,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <typeparam name="T"></typeparam>
 		/// <param name="action">The action.</param>
 		/// <returns></returns>
-		public async Task ChangeViewModelForCurrentConnection<T>(Action<T> action) where T : DotvvmViewModelBase
+		public async Task ChangeViewModelForCurrentConnectionAsync<T>(Action<T> action) where T : DotvvmViewModelBase
 		{
+			if (action == null)
+			{
+				throw new ArgumentNullException(nameof(action));
+			}
 			var connection = WebSocketManager.GetConnetionById(ConnectionId);
 
 			lock (connection)
@@ -203,7 +227,12 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <returns></returns>
 		public string CreateTask<T>(Func<T, CancellationToken, string, Task> func) where T : WebSocketService
 		{
+			if (func == null)
+			{
+				throw new ArgumentNullException(nameof(func));
+			}
 			var tokenSource = new CancellationTokenSource();
+
 			var connection = WebSocketManager.GetConnetionById(ConnectionId);
 
 			connection.ViewModelState.LastSentViewModel = Context.ViewModel;
@@ -230,7 +259,7 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <param name="taskId">The task identifier.</param>
 		public void StopTask(string taskId)
 		{
-			WebSocketManager.StopTaskWithId(taskId);
+			WebSocketManager.RemoveTaskWithId(taskId);
 		}
 
 		#endregion
@@ -241,7 +270,10 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// </summary>
 		public void SaveCurrentState()
 		{
-			if (ConnectionId == null) return;
+			if (ConnectionId == null)
+			{
+				return;
+			}
 
 			var connection = WebSocketManager.GetConnetionById(ConnectionId);
 
@@ -254,18 +286,28 @@ namespace DotVVMWebSocketExtension.WebSocketService
 		/// <summary>
 		/// Sends the synchronize request to client.
 		/// Used in task to update the state of current ViewModel stored on server
+		/// It awaits until new Viewmodel comes
 		/// </summary>
 		/// <param name="taskId">The task identifier.</param>
 		/// <returns></returns>
 		public async Task SendSyncRequestToClient(string taskId)
 		{
+			if (string.IsNullOrEmpty(taskId))
+			{
+				throw new ArgumentNullException(nameof(taskId));
+			}
 			await SendMessageToClientAsync(
 				JsonConvert.SerializeObject(new {action = WebSocketRequestType.WebSocketViewModelSync, taskId}, Formatting.None));
 
 			var task = WebSocketManager.TaskList.SelectMany(s => s.Value).FirstOrDefault(s => s.TaskId == taskId);
 			if (task != null)
 			{
+				task.TaskCompletion = new TaskCompletionSource<bool>();
 				await task.TaskCompletion.Task;
+			}
+			else
+			{
+				throw new NullReferenceException($"task with id{taskId} doesnt exist");
 			}
 		}
 	}
