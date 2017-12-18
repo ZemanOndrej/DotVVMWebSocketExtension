@@ -10,10 +10,6 @@
 		<span>Text:{{value: Text}}</span>
 	</div>
 	
-	SocketId
-	<{{value: Service.ConnectionId}}>
-
-
 	<dot:TextBox Text="{value: Text2}"/>
 
 	<dot:RequiredResource Name="websocketScript" />

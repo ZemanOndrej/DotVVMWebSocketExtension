@@ -37,8 +37,8 @@ namespace BL.Facades
 
 		public void AddUserToChatRoom(int roomId, UserDto user)
 		{
-			var usr = Context.Users.Include(u=>u.CurrentChatRoom).FirstOrDefault(u => u.Id == user.Id);
-			var room = Context.ChatRooms.Include(s=>s.UserList).FirstOrDefault(g=>g.Id==roomId);
+			var usr = Context.Users.Include(u => u.CurrentChatRoom).FirstOrDefault(u => u.Id == user.Id);
+			var room = Context.ChatRooms.Include(s => s.UserList).FirstOrDefault(g => g.Id == roomId);
 			usr.CurrentChatRoom?.UserList.Remove(usr);
 			usr.CurrentChatRoom = room;
 			if (!room.UserList.Contains(usr))
@@ -63,16 +63,19 @@ namespace BL.Facades
 
 		public List<ChatMessageDto> GetAllMessagesFromRoom(int id)
 		{
-			var msgs = Context.ChatMessages.Where(c => c.ChatRoom.Id == id).OrderByDescending(m=>m.Time).Include(u => u.User).ToList();
-			return Mapping.Mapper.Map<List<ChatMessageDto>>(msgs);
-		}
-		public List<ChatMessageDto> GetRecentMessagesFromRoom(int id)
-		{
-			var msgs = Context.ChatMessages.Where(c => c.ChatRoom.Id == id).OrderByDescending(m=>m.Time).Take(5).Include(u => u.User).ToList();
+			var msgs = Context.ChatMessages.Where(c => c.ChatRoom.Id == id).OrderByDescending(m => m.Time).Include(u => u.User)
+				.ToList();
 			return Mapping.Mapper.Map<List<ChatMessageDto>>(msgs);
 		}
 
-		public int SendMessageToChatRoom(UserDto user,ChatMessageDto messageDto)
+		public List<ChatMessageDto> GetRecentMessagesFromRoom(int id)
+		{
+			var msgs = Context.ChatMessages.Where(c => c.ChatRoom.Id == id).OrderByDescending(m => m.Time).Take(5)
+				.Include(u => u.User).ToList();
+			return Mapping.Mapper.Map<List<ChatMessageDto>>(msgs);
+		}
+
+		public int SendMessageToChatRoom(UserDto user, ChatMessageDto messageDto)
 		{
 			var message = Mapping.Mapper.Map<ChatMessage>(messageDto);
 
@@ -87,9 +90,10 @@ namespace BL.Facades
 		{
 			return Mapping.Mapper.Map<ChatMessageDto>(Context.ChatMessages.Find(id));
 		}
+
 		public ChatRoomDto GetChatRoomById(int id)
 		{
-			return Mapping.Mapper.Map<ChatRoomDto>(Context.ChatRooms.Find(id));
+			return Mapping.Mapper.Map<ChatRoomDto>(Context.ChatRooms.Include(c => c.UserList).First(c => c.Id == id));
 		}
 
 		public void DeteleDisconnectedUsers(string connectionId)
@@ -97,7 +101,5 @@ namespace BL.Facades
 			Context.Users.Remove(Context.Users.First(u => u.ConnectionId == connectionId));
 			Context.SaveChanges();
 		}
-
-
 	}
 }

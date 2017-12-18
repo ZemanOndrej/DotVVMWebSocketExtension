@@ -44,17 +44,6 @@ namespace DotVVMWebSocketExtension.Tests
   },
   ""action"": ""successfulCommand""
 }");
-
-		public static string SerializedViewModel => JObject.Parse(@"{
-				""viewModel"": {
-					""RoomName"": ""fsdfsd"",
-
-					""$csrfToken"": ""CfDJ8OvjlpKWk6BNv5R6oeQf5IEfsSKxQJe4LU55dlvgG4wquxzZmz7euS3UeElZGIds3Xre3jsWY8xD49rxPyvVQWnnFuKIky7WnvclncmOtZSYUI5Gyl6T8Aqds8pZEdoHKVt2uNDuOW529j0aU3uP39zp4nL8Hgq8NstF9bIBvP6p""
-				},
-			}
-		").ToString();
-
-
 	}
 
 	public class TestClass : DotvvmViewModelBase

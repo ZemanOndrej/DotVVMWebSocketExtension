@@ -3,8 +3,6 @@
 
 <dot:Content ContentPlaceHolderID="MainContent">
 
-	SocketId<{{value: Service.ConnectionId}}>
-
 	<div class="{value: IsLoggedIn ? 'hidden':'nothidden'}" id="overlay">
 		<div id="loginform">
 			<dot:TextBox Text="{value: CurrentUser.Name}" placeholder="Enter your name" />
@@ -19,7 +17,7 @@
 		<div id="chatroomMenu">
 			<dot:TextBox Text="{value: NewRoomName}" placeholder="Enter new chatroom Name" />
 			<dot:Button Click="{command: CreateRoom()}">Create</dot:Button>
-
+			<div>ChatRooms</div>
 			<dot:Repeater DataSource="{value: ChatRooms}">
 				<ItemTemplate>
 					<div>
@@ -27,6 +25,14 @@
 						<dot:Button Click="{command: _parent.JoinRoom(Id)}">Join</dot:Button>
 					</div>
 
+				</ItemTemplate>
+			</dot:Repeater>
+			<div>Users</div>
+			<dot:Repeater DataSource="{value: CurrentRoom.UserList}">
+				<ItemTemplate>
+					<div>
+						<span>{{value: Name}}</span>
+					</div>
 				</ItemTemplate>
 			</dot:Repeater>
 		</div>

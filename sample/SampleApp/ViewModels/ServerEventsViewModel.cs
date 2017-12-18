@@ -26,32 +26,35 @@ namespace SampleApp.ViewModels
 		{
 			IsPercentageVisible = true;
 			Percentage = 0;
-			Text = "Action is starting";
+			Text = "Task is starting";
 			Service.CreateTask<WebSocketService>(LongTaskAsync);
 		}
 
 		public async Task LongTaskAsync(WebSocketService webSocketService, CancellationToken cancellationToken, string taskId)
 		{
-			for (int i = 1; i < 500; ++i)
+
+			for (int i = 1; i < 10; ++i)
 			{
-				await Task.Delay(20);
+				await Task.Delay(2000);
 				cancellationToken.ThrowIfCancellationRequested();
-				if (i == 50)
+				if (i == 5)
 				{
 					await webSocketService.SendSyncRequestToClient(taskId);
 				}
 
 				await webSocketService.ChangeViewModelForCurrentConnectionAsync((ServerEventsViewModel changes) =>
 				{
+					changes.Text = "task is running";
 					changes.Percentage = i;
 				});
-				await Task.Delay(20);
+				await Task.Delay(2000);
 			}
 
 
 			await webSocketService.ChangeViewModelForCurrentConnectionAsync((ServerEventsViewModel changes) =>
 			{
 				changes.Text = "Task is Complete";
+				changes.Text2 = changes.Text2 + "Task is Complete";
 				changes.IsPercentageVisible = false;
 			});
 		}

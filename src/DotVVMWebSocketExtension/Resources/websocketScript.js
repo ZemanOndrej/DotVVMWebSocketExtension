@@ -14,9 +14,8 @@
 		var socket = new WebSocket(uri);
 		dotvvm.websocket = socket;
 
-//		socket.onopen = function(event) {
-//			console.log("opened connection to " + uri + "; ");
-//		};
+		socket.onopen = function(event) {
+		};
 		socket.onclose = function (event) {
 			console.log(`WebSocketClient: retry in ${autoReconnectInterval}ms`, event);
 			setTimeout(function () {
@@ -27,13 +26,11 @@
 		};
 		socket.onmessage = function(event) {
 			var resultObject = JSON.parse(event.data);
-//			console.log("onmessage", resultObject);
 			switch (resultObject.action) {
 			case messageEnum.Init:
 				dotvvm.viewModelObservables[viewModelName]().Service().ConnectionId(resultObject.socketId);
 				break;
 			case messageEnum.Change:
-
 				updateViewModel(resultObject);
 				break;
 			case messageEnum.Sync:

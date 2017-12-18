@@ -59,10 +59,7 @@ namespace SampleApp.ViewModels
 				Messages.Add(msg);
 				NewMessage = "";
 
-				await Service.ChangeViewModelForConnectionsAsync((ChatViewModel viewModel) =>
-					{
-						viewModel.Messages.Add(msg);
-					},
+				await Service.ChangeViewModelForConnectionsAsync((ChatViewModel viewModel) => { viewModel.Messages.Add(msg); },
 					ChatFacade
 						.GetAllUsersFromChatRoom(CurrentRoom.Id)
 						.Select(s => s.ConnectionId)
@@ -81,20 +78,61 @@ namespace SampleApp.ViewModels
 			ChatRooms.Add(newChatRoom);
 			NewRoomName = "";
 
-			await Service.ChangeViewModelForConnectionsAsync((ChatViewModel viewModel) => { viewModel.ChatRooms.Add(newChatRoom); },
+			await Service.ChangeViewModelForConnectionsAsync(
+				(ChatViewModel viewModel) => { viewModel.ChatRooms.Add(newChatRoom); },
 				ChatFacade.GetAllConnectedUsers()
 					.Select(s => s.ConnectionId)
 					.ToList());
 		}
 
-		public void JoinRoom(int id)
+		public async Task JoinRoom(int id)
 		{
 			if (id == CurrentRoom.Id) return;
+			if (CurrentRoom.Id != 0)
+			{
+				ChatFacade.LeaveChatRoom(CurrentRoom.Id,CurrentUser.Id);
+				await Service.ChangeViewModelForConnectionsAsync(
+					(ChatViewModel viewModel) =>
+					{
+						viewModel.CurrentRoom.UserList= viewModel.CurrentRoom.UserList.Where(u =>u.Id!=CurrentUser.Id).ToList();
+						viewModel.Messages.Add(new ChatMessageDto
+						{
+							Message = "User has left",
+							UserName = CurrentUser.Name,
+							ChatRoomId = CurrentRoom.Id,
+							Time = DateTime.Now,
+							UserId = CurrentUser.Id
+						});
+					},
+					ChatFacade
+						.GetAllUsersFromChatRoom(CurrentRoom.Id)
+						.Select(s => s.ConnectionId)
+						.ToList());
+			}
+
 			CurrentRoom = ChatFacade.GetChatRoomById(id);
 			ChatFacade.AddUserToChatRoom(id, CurrentUser);
 
 			Messages = ChatFacade.GetRecentMessagesFromRoom(id);
 			IsInRoom = true;
+			CurrentRoom.UserList.Add(CurrentUser);
+			await Service.ChangeViewModelForConnectionsAsync(
+				(ChatViewModel viewModel) =>
+				{
+					viewModel.CurrentRoom.UserList.Add(CurrentUser);
+					viewModel.Messages.Add(new ChatMessageDto
+					{
+						Message = "User has connected",
+						UserName = CurrentUser.Name,
+						ChatRoomId = CurrentRoom.Id,
+						Time = DateTime.Now,
+						UserId = CurrentUser.Id
+					});
+				},
+				ChatFacade
+					.GetAllUsersFromChatRoom(CurrentRoom.Id)
+					.Select(s => s.ConnectionId)
+					.ToList());
 		}
 
 		public override Task PreRender()
